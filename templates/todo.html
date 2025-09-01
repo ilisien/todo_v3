@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tdv3!</title>
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js" integrity="sha384-Akqfrbj/HpNVo8k11SXBb6TlBWmXXlYQrCSqEWmyKJe+hDm3Z/B2WVG4smwBkRVm" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <script>
+    document.addEventListener('keydown', function(event) {
+        const el = event.target;
+        if (el.isContentEditable && event.key === "Enter") {
+            event.preventDefault();
+        }
+    });
+    </script>
+    <span class="htmx-indicator" id="loading">loading ...</span>
+    <div class="todo-wrapper" hx-trigger="keyup[key=='Enter' && event.target.tagName == 'BODY'] from:body" hx-post="/create-first-task" hx-swap="innerHTML" hx-indicator="#loading" autofocus>
+
+    </div>
+</body>
+</html>
