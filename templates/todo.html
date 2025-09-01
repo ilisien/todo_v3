@@ -5,20 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>tdv3!</title>
     <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js" integrity="sha384-Akqfrbj/HpNVo8k11SXBb6TlBWmXXlYQrCSqEWmyKJe+hDm3Z/B2WVG4smwBkRVm" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="static/style.css">
 </head>
 <body>
-    <script>
-    document.addEventListener('keydown', function(event) {
-        const el = event.target;
-        if (el.isContentEditable && event.key === "Enter") {
-            event.preventDefault();
-        }
-    });
-    </script>
-    <span class="htmx-indicator" id="loading">loading ...</span>
-    <div class="todo-wrapper" hx-trigger="keyup[key=='Enter' && event.target.tagName == 'BODY'] from:body" hx-post="/create-first-task" hx-swap="innerHTML" hx-indicator="#loading" autofocus>
-
+    <div class="task-container">
+        <span class="title">tdv3!</span>
+        
+        <div id="task-list"
+             hx-post="/create-first-task"
+             hx-target="#task-list"
+             hx-trigger="keydown[key=='Enter' && event.target.tagName == 'BODY'] from:body"
+             hx-swap="innerHTML">
+            {% if tasks %}
+                {% include '_task_list.html' %}
+            {% else %}
+                <div class="empty-state">
+                    press [Enter] to create your first task
+                </div>
+            {% endif %}
+        </div>
     </div>
+
+    <script>
+        // Only prevent default Enter behavior in contenteditable elements
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.contentEditable === 'true') {
+                e.preventDefault();
+            }
+        });
+    </script>
 </body>
 </html>

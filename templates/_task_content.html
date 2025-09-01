@@ -1,0 +1,33 @@
+<div class="task-content-wrapper">
+     <div class="align-left">
+          <span class="completed" 
+               hx-post="/toggle-task/{{ task.id }}"
+               hx-target="#task-content-{{ task.id }}"
+               hx-swap="innerHTML"
+               hx-trigger="click">{% if task.completed %}[x]{% else %}[ ]{% endif %}</span>
+     
+          <span class="name" 
+               contenteditable="true"
+               data-placeholder="Enter task name..."
+               hx-post="/update-task/{{ task.id }}"
+               hx-trigger="blur"
+               hx-target="#task-content-{{ task.id }}"
+               hx-swap="innerHTML"
+               hx-vals='js:{"name": event.target.textContent.trim()}'>{{ task.name }}</span>
+     </div>
+
+     <div class="align-right">
+          <span class="delete-btn"
+               hx-post="delete-task/{{ task.id }}"
+               hx-target="#task-item-{{ task.id }}"
+               hx-swap="outerHTML"
+               hx-trigger="click">x</span>
+     </div>
+</div>
+
+<!-- Hidden form to handle Enter key for creating subtasks -->
+<form style="display: none;" 
+      hx-post="/create-subtask/{{ task.id }}"
+      hx-target="#subtasks-{{ task.id }}"
+      hx-swap="beforeend"
+      hx-trigger="keydown[key=='Enter'] from:previous .name"></form>

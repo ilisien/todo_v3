@@ -1,0 +1,12 @@
+<div id="task-item-{{ task.id }}" class="task-item">
+    <div id="task-content-{{ task.id }}">
+        {% include '_task_content.html' %}
+    </div>
+    
+    <div id="subtasks-{{ task.id }}" class="subtasks">
+        {% for subtask in task.children %}
+            {% set task = subtask %}
+            {% include '_task.html' %}
+        {% endfor %}
+    </div>
+</div>
