@@ -8,6 +8,7 @@
                hx-indicator="#indicator">{% if task.completed %}[x]{% else %}[ ]{% endif %}</span>
      
           <span class="name" 
+               id="task-name-{{ task.id }}"
                contenteditable="true"
                data-placeholder="Enter task name..."
                hx-post="/update-task/{{ task.id }}"
@@ -23,7 +24,7 @@
                hx-post="delete-task/{{ task.id }}"
                hx-target="#task-item-{{ task.id }}"
                hx-swap="outerHTML"
-               hx-trigger="click"
+               hx-trigger="click, keyup[ctrlKey&&key=='Delete'] from:#task-content-{{ task.id }}"
                hx-indicator="#indicator">x</span>
      </div>
 </div>
