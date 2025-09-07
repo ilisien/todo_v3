@@ -27,13 +27,24 @@ class Task(db.Model):
     description = db.Column(db.String(2048), default="")
     due_date = db.Column(db.DateTime, default=datetime.datetime.now)
 
-def move_task(upordown,):
-
+def displace_task(displacement,task_id):
+    task_at_hand = Task.query.get_or_404(task_id)
+    task_start_pos = task_at_hand.order
+    task_new_pos = task_start_pos + displacement
+    siblings_of_task = sorted(Task.query.filter_by(parent_id=task_at_hand.parent_id).all(),key=lambda x: x.order)
+    print(task_at_hand,task_start_pos,siblings_of_task)
+    if 0 <= task_new_pos <= len(siblings_of_task)-1:
+        siblings_of_task.insert(task_new_pos,siblings_of_task.pop(task_start_pos))
+        
+        for i, sibling in enumerate(siblings_of_task):
+            sibling.order = i
+        
+        db.session.commit()
 
 @app.route('/')
 def base_view():
     # Get all root tasks (tasks without parent)
-    root_tasks = Task.query.filter_by(parent_id=None).all()
+    root_tasks = sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order)
     return render_template("todo.html", tasks=root_tasks)
 
 @app.route("/create-first-task", methods=["POST"])
@@ -45,7 +56,7 @@ def create_first_task():
     db.session.commit()
     
     # Return the new task wrapped in the task list
-    root_tasks = Task.query.filter_by(parent_id=None).all()
+    root_tasks = sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order)
     return render_template("_task_list.html", tasks=root_tasks)
 
 @app.route("/create-subtask/<int:parent_id>", methods=["POST"])
@@ -76,6 +87,14 @@ def update_task(task_id):
     # Return the updated task
     return render_template("_task_content.html", task=task)
 
+@app.route("/move-task/<int:task_id>", methods=["POST"])
+def move_task(task_id):
+    displace_task(int(request.form.get('displacement', '')),task_id)
+    
+    # This probably doesn't require a full re-render, but i'm not ready to figure out how to not to this yet
+    root_tasks = sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order)
+    return render_template("_task_list.html", tasks=root_tasks)
+
 @app.route("/delete-task/<int:task_id>", methods=["POST"])
 def delete_task(task_id):
     task = Task.query.get_or_404(task_id)
@@ -87,4 +106,4 @@ def delete_task(task_id):
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    app.run(debug=True) #,host='0.0.0.0'

@@ -36,3 +36,21 @@
       hx-swap="beforeend"
       hx-trigger="keydown[key=='Enter'] from:previous .name"
       hx-indicator="#indicator"></form>
+
+<!-- another form to handle displacement upwards-->
+<form style="display: none;" 
+      hx-post="/move-task/{{ task.id }}"
+      hx-target="#task-list"
+      hx-swap="innerHTML"
+      hx-trigger="keyup[ctrlKey&&key=='ArrowUp'] from:previous .name"
+      hx-vals='js:{"displacement": -1}'
+      hx-indicator="#indicator"></form>
+
+<!-- another form to handle displacement downwards-->
+<form style="display: none;" 
+      hx-post="/move-task/{{ task.id }}"
+      hx-target="#task-list"
+      hx-swap="innerHTML"
+      hx-trigger="keyup[ctrlKey&&key=='ArrowDown'] from:previous .name"
+      hx-vals='js:{"displacement": 1}'
+      hx-indicator="#indicator"></form>
