@@ -32,7 +32,6 @@ def displace_task(displacement,task_id):
     task_start_pos = task_at_hand.order
     task_new_pos = task_start_pos + displacement
     siblings_of_task = sorted(Task.query.filter_by(parent_id=task_at_hand.parent_id).all(),key=lambda x: x.order)
-    print(task_at_hand,task_start_pos,siblings_of_task)
     if 0 <= task_new_pos <= len(siblings_of_task)-1:
         siblings_of_task.insert(task_new_pos,siblings_of_task.pop(task_start_pos))
         

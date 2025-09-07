@@ -20,6 +20,9 @@
      </div>
 
      <div class="align-right">
+          <span class="due">
+               {{ task.due_date.strftime('%#d/%#m/') + (task.due_date.year ~ "")[-1] }}
+          </span>
           <span class="delete-btn"
                hx-post="delete-task/{{ task.id }}"
                hx-target="#task-item-{{ task.id }}"
