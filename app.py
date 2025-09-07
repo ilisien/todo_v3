@@ -77,14 +77,14 @@ def toggle_task(task_id):
     # Return the updated task content
     return render_template("_task_content.html", task=task)
 
-@app.route("/update-task/<int:task_id>", methods=["POST"])
-def update_task(task_id):
+@app.route("/update-task-name/<int:task_id>", methods=["POST"])
+def update_task_name(task_id):
     task = Task.query.get_or_404(task_id)
     task.name = request.form.get('name', '')
     db.session.commit()
     
     # Return the updated task
-    return render_template("_task_content.html", task=task)
+    return task.name
 
 @app.route("/move-task/<int:task_id>", methods=["POST"])
 def move_task(task_id):
@@ -93,6 +93,34 @@ def move_task(task_id):
     # This probably doesn't require a full re-render, but i'm not ready to figure out how to not to this yet
     root_tasks = sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order)
     return render_template("_task_list.html", tasks=root_tasks)
+
+@app.route("/update-task-due/<string:date_part>/<int:task_id>", methods=["POST"])
+def update_task_due(date_part,task_id):
+    print(date_part,task_id)
+    task = Task.query.get_or_404(task_id)
+    if date_part == "day":
+        try:
+            task.due_date = task.due_date.replace(day=int(request.form.get('day','')))
+            db.session.commit()
+            return task.due_date.strftime('%#d')
+        except:
+            return task.due_date.strftime('%#d')
+
+    elif date_part == "month":
+        try:
+            task.due_date = task.due_date.replace(month=int(request.form.get('month','')))
+            db.session.commit()
+            return task.due_date.strftime('%#m')
+        except:
+            return task.due_date.strftime('%#m')
+
+    elif date_part == "year":
+        try:
+            task.due_date = task.due_date.replace(year=int(f"202{request.form.get('year','')}"))
+            db.session.commit()
+            return str(task.due_date.year)[-1]
+        except:
+            return str(task.due_date.year)[-1]
 
 @app.route("/delete-task/<int:task_id>", methods=["POST"])
 def delete_task(task_id):

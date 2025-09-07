@@ -11,17 +11,44 @@
                id="task-name-{{ task.id }}"
                contenteditable="true"
                data-placeholder="Enter task name..."
-               hx-post="/update-task/{{ task.id }}"
+               hx-post="/update-task-name/{{ task.id }}"
                hx-trigger="blur"
-               hx-target="#task-content-{{ task.id }}"
+               hx-target="this"
                hx-swap="innerHTML"
                hx-vals='js:{"name": event.target.textContent.trim()}'
                hx-indicator="#indicator">{{ task.name }}</span>
      </div>
 
      <div class="align-right">
-          <span class="due">
-               {{ task.due_date.strftime('%#d/%#m/') + (task.due_date.year ~ "")[-1] }}
+          <span class="due_wrapper">
+               <span class="due_day"
+               contenteditable="true"
+               hx-post="/update-task-due/day/{{ task.id }}"
+               hx-trigger="blur"
+               hx-target="this"
+               hx-swap="innerHTML"
+               hx-vals='js:{"day": event.target.textContent.trim()}'
+               hx-indicator="#indicator"
+               onfocus="selectAll(this)"
+               >{{task.due_date.strftime('%#d')}}</span>/<span class="due_month"
+               contenteditable="true"
+               hx-post="/update-task-due/month/{{ task.id }}"
+               hx-trigger="blur"
+               hx-target="this"
+               hx-swap="innerHTML"
+               hx-vals='js:{"month": event.target.textContent.trim()}'
+               hx-indicator="#indicator"
+               onfocus="selectAll(this)"
+               >{{task.due_date.strftime('%#m')}}</span>/<span class="due_year"
+               contenteditable="true"
+               hx-post="/update-task-due/year/{{ task.id }}"
+               hx-trigger="blur"
+               hx-target="this"
+               hx-swap="innerHTML"
+               hx-vals='js:{"year": event.target.textContent.trim()}'
+               hx-indicator="#indicator"
+               onfocus="selectAll(this)"
+               >{{(task.due_date.year ~ "")[-1]}}</span>
           </span>
           <span class="delete-btn"
                hx-post="delete-task/{{ task.id }}"

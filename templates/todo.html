@@ -6,6 +6,16 @@
     <title>tdv3!</title>
     <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js" integrity="sha384-Akqfrbj/HpNVo8k11SXBb6TlBWmXXlYQrCSqEWmyKJe+hDm3Z/B2WVG4smwBkRVm" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="static/style.css">
+    <script>
+        // a script to allow for selection of a whole contenteditable upon click (for dates)
+        function selectAll(el) {
+            const range = document.createRange();
+            range.selectNodeContents(el);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }
+    </script>
 </head>
 <body>
     <span class="htmx-indicator" id="indicator">saving ...</span>

@@ -14,6 +14,11 @@ body {
     flex-direction: column;
 }
 
+*::selection {
+    background-color: black;
+    color: white;
+}
+
 .task-container {
     width: max(25%,250px);
 }
@@ -64,6 +69,11 @@ body {
     /*min-width: 100px;*/
     display: inline;
     max-width: 90%;
+}
+
+.due_day, .due_month, .due_year {
+    outline: none;
+    
 }
 
 .delete-btn {
