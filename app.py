@@ -96,7 +96,6 @@ def move_task(task_id):
 
 @app.route("/update-task-due/<string:date_part>/<int:task_id>", methods=["POST"])
 def update_task_due(date_part,task_id):
-    print(date_part,task_id)
     task = Task.query.get_or_404(task_id)
     if date_part == "day":
         try:

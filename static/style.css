@@ -71,7 +71,23 @@ body {
     max-width: 90%;
 }
 
-.due_day, .due_month, .due_year {
+.due-date-passed {
+    background-color: red;
+    color: white;
+}
+
+.due-date-today {
+    background-color: lightcoral;
+    color: white;
+}
+
+.due-date-tomorrow {
+    background-color: lightsalmon;
+    color: white;
+}
+
+
+.due-day, .due-month, .due-year {
     outline: none;
     
 }
