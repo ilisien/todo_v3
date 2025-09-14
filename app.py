@@ -97,29 +97,57 @@ def move_task(task_id):
 @app.route("/update-task-due/<string:date_part>/<int:task_id>", methods=["POST"])
 def update_task_due(date_part,task_id):
     task = Task.query.get_or_404(task_id)
+    today = datetime.datetime.now().date()
     if date_part == "day":
         try:
             task.due_date = task.due_date.replace(day=int(request.form.get('day','')))
             db.session.commit()
-            return task.due_date.strftime('%#d')
+            other_classes = ""
+            if task.due_date.date() < today:
+                other_classes += "past-due"
+            elif task.due_date.date() == today:
+                other_classes += "due-today "
+            elif task.due_date.date() == today + datetime.timedelta(days=1):
+                other_classes += "due-tomorrow "
+            elif (task.due_date.date() <= today + datetime.timedelta(days=7)):
+                other_classes += "due-in-next-week "
         except:
-            return task.due_date.strftime('%#d')
+            other_classes = "errored"
+        return render_template("_date_span.html", other_classes=other_classes,task=task,date_type="day", inner_text=task.due_date.strftime('%#d'))
 
     elif date_part == "month":
         try:
             task.due_date = task.due_date.replace(month=int(request.form.get('month','')))
             db.session.commit()
-            return task.due_date.strftime('%#m')
+            other_classes = ""
+            if task.due_date.date() < today:
+                other_classes += "past-due"
+            elif task.due_date.date() == today:
+                other_classes += "due-today "
+            elif task.due_date.date() == today + datetime.timedelta(days=1):
+                other_classes += "due-tomorrow "
+            elif task.due_date.date() <= today + datetime.timedelta(days=7):
+                other_classes += "due-in-next-week "
         except:
-            return task.due_date.strftime('%#m')
+            other_classes = "errored"
+        return render_template("_date_span.html", other_classes=other_classes,task=task,date_type="month", inner_text=task.due_date.strftime('%#m'))
 
     elif date_part == "year":
         try:
             task.due_date = task.due_date.replace(year=int(f"202{request.form.get('year','')}"))
             db.session.commit()
-            return str(task.due_date.year)[-1]
+            other_classes = ""
+            if task.due_date.date() < today:
+                other_classes += "past-due"
+            elif task.due_date.date() == today:
+                other_classes += "due-today "
+            elif task.due_date.date() == today + datetime.timedelta(days=1):
+                other_classes += "due-tomorrow "
+            elif task.due_date.date() <= today + datetime.timedelta(days=7):
+                other_classes += "due-in-next-week "
         except:
-            return str(task.due_date.year)[-1]
+            other_classes = "errored"
+        return render_template("_date_span.html", other_classes=other_classes,task=task,date_type="year", inner_text=str(task.due_date.year)[-1])
 
 @app.route("/delete-task/<int:task_id>", methods=["POST"])
 def delete_task(task_id):

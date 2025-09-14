@@ -1,0 +1,9 @@
+<span class="due-{{date_type}} {{other_classes}}"
+contenteditable="true"
+hx-post="/update-task-due/{{date_type}}/{{ task.id }}"
+hx-trigger="blur"
+hx-target="this"
+hx-swap="outerHTML"
+hx-vals='js:{"{{date_type}}": event.target.textContent.trim()}'
+hx-indicator="#indicator"
+onfocus="selectAll(this)">{{inner_text}}</span>
