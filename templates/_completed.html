@@ -1,0 +1,7 @@
+<span class="completed" 
+    id="completed-{{task.id}}"
+    hx-post="/toggle-task/{{ task.id }}"
+    hx-target="#task-content-{{ task.id }}"
+    hx-swap="innerHTML"
+    hx-trigger="{% if task.show_as_task %}click{% else %}none{% endif %}"
+    hx-indicator="#indicator">{% if task.show_as_task %}{% if task.completed %}[x]{% else %}[ ]{% endif %}{% else %}&nbsp;-&nbsp;{% endif %}</span>

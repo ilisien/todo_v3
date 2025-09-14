@@ -1,25 +1,38 @@
 <div class="task-content-wrapper">
      <div class="pagebottom">
-          <div class="description-wrapper">
-               <p class="description editable" 
-                  contenteditable="true"
-                  data-placeholder="undescribed ..."
-                  hx-post="/update-task-description/{{ task.id }}"
-                  hx-trigger="blur"
-                  hx-target="this"
-                  hx-swap="innerHTML"
-                  hx-vals='js:{"description": event.target.textContent.trim()}'
-                  hx-indicator="#indicator">{{task.description}}</p>
+          <div class="centered">          
+               <span class="option"
+                    id="date-toggle-{{task.id}}"
+                    tabindex="0"
+                    hx-post="/update-task-option/show-date-toggle/{{ task.id }}"
+                    hx-target="this"
+                    hx-swap="innerHTML"
+                    hx-trigger="click"
+                    hx-indicator="#indicator">{% if task.show_date %}[x] showing due date{% else %}[ ] hiding due date{% endif %}</span>
+               <span class="option" 
+                    id="task-toggle-{{task.id}}"
+                    tabindex="0"
+                    hx-post="/update-task-option/show-as-task-toggle/{{ task.id }}"
+                    hx-target="this"
+                    hx-swap="innerHTML"
+                    hx-trigger="click"
+                    hx-indicator="#indicator">{% if task.show_as_task %}[x] showing as task{% else %}[ ] showing as list item{% endif %}</span>
+               <div class="description-wrapper">
+                    <p class="description editable" 
+                    contenteditable="true"
+                    data-placeholder="undescribed ..."
+                    hx-post="/update-task-description/{{ task.id }}"
+                    hx-trigger="blur"
+                    hx-target="this"
+                    hx-swap="innerHTML"
+                    hx-vals='js:{"description": event.target.textContent.trim()}'
+                    hx-indicator="#indicator">{{task.description}}</p>
+               </div>
           </div>
      </div>
 
      <div class="align-left">
-          <span class="completed" 
-               hx-post="/toggle-task/{{ task.id }}"
-               hx-target="#task-content-{{ task.id }}"
-               hx-swap="innerHTML"
-               hx-trigger="click"
-               hx-indicator="#indicator">{% if task.completed %}[x]{% else %}[ ]{% endif %}</span>
+          {% include '_completed.html' %}
      
           <span class="name editable" 
                id="task-name-{{ task.id }}"
@@ -34,54 +47,7 @@
      </div>
 
      <div class="align-right">
-          {% set other_classes = "due-wrapper " %}
-          {% set today = task.due_date.now().date() %}
-          {% if task.due_date.date() < today %}
-               {% set other_classes = other_classes ~ "past-due " %}
-          {% elif task.due_date.date() == today %}
-               {% set other_classes = other_classes ~ "due-today " %}
-          {% elif task.due_date.date() == today.replace(day=today.day+1) %}
-               {% set other_classes = other_classes ~ "due-tomorrow " %}
-          {% elif task.due_date.date() <= today.replace(day=today.day+7) %}
-               {% set other_classes = other_classes ~ "due-this-week " %}
-          {% endif %}
-          <span class="{{other_classes}}"
-                hx-post="/get-updated-date-warning/{{ task.id }}"
-                hx-trigger="blur from:#date-component-in-{{task.id}}"
-                hx-swap="none"
-                hx-on::after-request="this.className = event.detail.xhr.responseText">
-               <span class="due-day"
-               id="date-component-in-{{task.id}}"
-               contenteditable="true"
-               hx-post="/update-task-due/day/{{ task.id }}"
-               hx-trigger="blur"
-               hx-target="this"
-               hx-swap="innerHTML"
-               hx-vals='js:{"day": event.target.textContent.trim()}'
-               hx-indicator="#indicator"
-               onfocus="selectAll(this)"
-               >{{task.due_date.strftime('%d')}}</span>/<span class="due-month"
-               id="date-component-in-{{task.id}}"
-               contenteditable="true"
-               hx-post="/update-task-due/month/{{ task.id }}"
-               hx-trigger="blur"
-               hx-target="this"
-               hx-swap="innerHTML"
-               hx-vals='js:{"month": event.target.textContent.trim()}'
-               hx-indicator="#indicator"
-               onfocus="selectAll(this)"
-               >{{task.due_date.strftime('%m')}}</span>/<span class="due-year"
-               id="date-component-in-{{task.id}}"
-               contenteditable="true"
-               hx-post="/update-task-due/year/{{ task.id }}"
-               hx-trigger="blur"
-               hx-target="this"
-               hx-swap="innerHTML"
-               hx-vals='js:{"year": event.target.textContent.trim()}'
-               hx-indicator="#indicator"
-               onfocus="selectAll(this)"
-               >{{(task.due_date.year ~ "")[-1]}}</span>
-          </span>
+          {% include '_due_wrapper.html' %}
           <span class="delete-btn"
                hx-post="delete-task/{{ task.id }}"
                hx-target="#task-item-{{ task.id }}"
@@ -115,4 +81,20 @@
       hx-swap="innerHTML"
       hx-trigger="keyup[ctrlKey&&key=='ArrowDown'] from:previous .name"
       hx-vals='js:{"displacement": 1}'
+      hx-indicator="#indicator"></form>
+
+<!-- handle refreshing complete after option change -->
+<form style="display: none;" 
+      hx-post="/refresh/complete/{{ task.id }}"
+      hx-target="#completed-{{task.id}}"
+      hx-swap="outerHTML"
+      hx-trigger="click from:#task-toggle-{{task.id}}"
+      hx-indicator="#indicator"></form>
+
+<!-- handle refreshing date component after option change -->
+<form style="display: none;" 
+      hx-post="/refresh/date/{{ task.id }}"
+      hx-target="#due-wrapper-{{task.id}}"
+      hx-swap="outerHTML"
+      hx-trigger="click from:#date-toggle-{{task.id}}"
       hx-indicator="#indicator"></form>
