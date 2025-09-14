@@ -20,8 +20,14 @@
      </div>
 
      <div class="align-right">
-          <span class="due-wrapper{% if task.due_date.date() < task.due_date.now().date() %} due-date-passed{% else %}{% endif %}{% if task.due_date.date() == task.due_date.now().date() %} due-date-today{% else %}{% endif %}{% if task.due_date.replace(day=task.due_date.day-1).date() == task.due_date.now().date() %} due-date-tomorrow{% else %}{% endif %}">
+          <span class="due-wrapper{% if task.due_date.date() < task.due_date.now().date() %} past-due{% else %}{% endif %}{% if task.due_date.date() == task.due_date.now().date() %} due-today{% else %}{% endif %}{% if task.due_date.replace(day=task.due_date.day-1).date() == task.due_date.now().date() %} due-tomorrow{% else %}{% endif %}"
+                hx-post="/get-updated-date-warning/{{ task.id }}"
+                hx-trigger="blur from:#date-component-in-{{task.id}}"
+                hx-swap="none"
+                hx-on::after-request="this.className = event.detail.xhr.responseText"></span>
+                >
                <span class="due-day"
+               id="date-component-in-{{task.id}}"
                contenteditable="true"
                hx-post="/update-task-due/day/{{ task.id }}"
                hx-trigger="blur"
@@ -31,6 +37,7 @@
                hx-indicator="#indicator"
                onfocus="selectAll(this)"
                >{{task.due_date.strftime('%#d')}}</span>/<span class="due-month"
+               id="date-component-in-{{task.id}}"
                contenteditable="true"
                hx-post="/update-task-due/month/{{ task.id }}"
                hx-trigger="blur"
@@ -40,6 +47,7 @@
                hx-indicator="#indicator"
                onfocus="selectAll(this)"
                >{{task.due_date.strftime('%#m')}}</span>/<span class="due-year"
+               id="date-component-in-{{task.id}}"
                contenteditable="true"
                hx-post="/update-task-due/year/{{ task.id }}"
                hx-trigger="blur"

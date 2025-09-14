@@ -121,6 +121,11 @@ def update_task_due(date_part,task_id):
         except:
             return str(task.due_date.year)[-1]
 
+@app.route("/get-updated-date-warning/<int:task_id>", methods=["POST"])
+def update_task_due(task_id):
+    task = Task.query.get_or_404(task_id)
+
+
 @app.route("/delete-task/<int:task_id>", methods=["POST"])
 def delete_task(task_id):
     task = Task.query.get_or_404(task_id)
