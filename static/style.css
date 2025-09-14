@@ -7,11 +7,13 @@ body {
     font-family: monospace;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start ;
     width: 100%;
     min-height:100vh;
     min-width: 300px;
     flex-direction: column;
+    margin-top: 50px;
+    overflow: hidden;
 }
 
 *::selection {
@@ -31,7 +33,7 @@ body {
 
 .task-container {
     width: max(33%,350px);
-    height: 50vh;
+    height: calc(100vh - 300px);
     overflow-y: scroll;
 }
 
