@@ -97,6 +97,7 @@ def move_task(task_id):
 @app.route("/update-task-due/<string:date_part>/<int:task_id>", methods=["POST"])
 def update_task_due(date_part,task_id):
     task = Task.query.get_or_404(task_id)
+
     if date_part == "day":
         try:
             task.due_date = task.due_date.replace(day=int(request.form.get('day','')))
@@ -124,7 +125,17 @@ def update_task_due(date_part,task_id):
 @app.route("/get-updated-date-warning/<int:task_id>", methods=["POST"])
 def update_task_due(task_id):
     task = Task.query.get_or_404(task_id)
-
+    today = datetime.datetime.now().date()
+    other_classes = "due-wrapper "
+    if task.due_date.date() < today:
+        other_classes += "past-due "
+    elif task.due_date.date() == today:
+        other_classes += "due-today "
+    elif task.due_date.date() == today + datetime.timedelta(days=1):
+        other_classes += "due-tomorrow "
+    elif (task.due_date.date() <= today + datetime.timedelta(days=7)):
+        other_classes += "due-in-next-week "
+    return other_classes
 
 @app.route("/delete-task/<int:task_id>", methods=["POST"])
 def delete_task(task_id):
