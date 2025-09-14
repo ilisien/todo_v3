@@ -19,8 +19,14 @@ body {
     color: white;
 }
 
+.editable:empty::before {
+    content: attr(data-placeholder);
+    color: #aaa;
+    pointer-events: none;
+}
+
 .task-container {
-    width: max(25%,250px);
+    width: max(33%,350px);
 }
 
 .task-item {
@@ -38,9 +44,45 @@ body {
     flex-direction: row;
 }
 
+.pagebottom {
+    position: absolute;
+    bottom: 10px;
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+    width:100%;
+    left:0;
+    visibility: hidden;
+}
+
+.description-wrapper {
+    padding: 10px;
+    border-radius: 4px;
+    border:dashed;
+    width:max(33%,350px);
+    height:100px;
+}
+
+.task-content-wrapper:focus-within .pagebottom {
+    visibility: visible;
+}
+
+p.description {
+    width: 100%;
+    height:100%;
+    outline: none;
+    overflow-y: scroll;
+}
+
+p.description::-webkit-scrollbar {
+    display: none;
+}
+
 .align-left {
     display:flex;
     flex-direction: row;
+    flex-grow: 10;
+    align-items: center;
 }
 
 .align-right {
@@ -48,6 +90,7 @@ body {
     flex-direction: row;
     flex-shrink: 0;
     gap: 5px;
+    align-items: center;
 }
 
 .subtasks {
@@ -73,6 +116,7 @@ body {
 
 .due-wrapper {
     border-radius: 4px;
+    display:inline;
 }
 
 .past-due {
@@ -91,7 +135,7 @@ body {
 }
 
 .due-this-week {
-    background-color: blue;
+    background-color: cornflowerblue;
     color: white;
 }
 

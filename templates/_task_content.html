@@ -1,4 +1,18 @@
 <div class="task-content-wrapper">
+     <div class="pagebottom">
+          <div class="description-wrapper">
+               <p class="description editable" 
+                  contenteditable="true"
+                  data-placeholder="undescribed ..."
+                  hx-post="/update-task-description/{{ task.id }}"
+                  hx-trigger="blur"
+                  hx-target="this"
+                  hx-swap="innerHTML"
+                  hx-vals='js:{"description": event.target.textContent.trim()}'
+                  hx-indicator="#indicator">{{task.description}}</p>
+          </div>
+     </div>
+
      <div class="align-left">
           <span class="completed" 
                hx-post="/toggle-task/{{ task.id }}"
@@ -7,10 +21,10 @@
                hx-trigger="click"
                hx-indicator="#indicator">{% if task.completed %}[x]{% else %}[ ]{% endif %}</span>
      
-          <span class="name" 
+          <span class="name editable" 
                id="task-name-{{ task.id }}"
                contenteditable="true"
-               data-placeholder="Enter task name..."
+               data-placeholder="unnamed ..."
                hx-post="/update-task-name/{{ task.id }}"
                hx-trigger="blur"
                hx-target="this"
@@ -46,7 +60,7 @@
                hx-vals='js:{"day": event.target.textContent.trim()}'
                hx-indicator="#indicator"
                onfocus="selectAll(this)"
-               >{{task.due_date.strftime('%#d')}}</span>/<span class="due-month"
+               >{{task.due_date.strftime('%d')}}</span>/<span class="due-month"
                id="date-component-in-{{task.id}}"
                contenteditable="true"
                hx-post="/update-task-due/month/{{ task.id }}"
@@ -56,7 +70,7 @@
                hx-vals='js:{"month": event.target.textContent.trim()}'
                hx-indicator="#indicator"
                onfocus="selectAll(this)"
-               >{{task.due_date.strftime('%#m')}}</span>/<span class="due-year"
+               >{{task.due_date.strftime('%m')}}</span>/<span class="due-year"
                id="date-component-in-{{task.id}}"
                contenteditable="true"
                hx-post="/update-task-due/year/{{ task.id }}"

@@ -86,6 +86,15 @@ def update_task_name(task_id):
     # Return the updated task
     return task.name
 
+@app.route("/update-task-description/<int:task_id>", methods=["POST"])
+def update_task_description(task_id):
+    task = Task.query.get_or_404(task_id)
+    task.description = request.form.get('description', '')
+    db.session.commit()
+    
+    # Return the updated task
+    return task.description
+
 @app.route("/move-task/<int:task_id>", methods=["POST"])
 def move_task(task_id):
     displace_task(int(request.form.get('displacement', '')),task_id)
