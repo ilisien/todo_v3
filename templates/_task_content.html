@@ -20,12 +20,22 @@
      </div>
 
      <div class="align-right">
-          <span class="due-wrapper{% if task.due_date.date() < task.due_date.now().date() %} past-due{% else %}{% endif %}{% if task.due_date.date() == task.due_date.now().date() %} due-today{% else %}{% endif %}{% if task.due_date.replace(day=task.due_date.day-1).date() == task.due_date.now().date() %} due-tomorrow{% else %}{% endif %}"
+          {% set other_classes = "due-wrapper " %}
+          {% set today = task.due_date.now().date() %}
+          {% if task.due_date.date() < today %}
+               {% set other_classes = other_classes ~ "past-due " %}
+          {% elif task.due_date.date() == today %}
+               {% set other_classes = other_classes ~ "due-today " %}
+          {% elif task.due_date.date() == today.replace(day=today.day+1) %}
+               {% set other_classes = other_classes ~ "due-tomorrow " %}
+          {% elif task.due_date.date() <= today.replace(day=today.day+7) %}
+               {% set other_classes = other_classes ~ "due-this-week " %}
+          {% endif %}
+          <span class="{{other_classes}}"
                 hx-post="/get-updated-date-warning/{{ task.id }}"
                 hx-trigger="blur from:#date-component-in-{{task.id}}"
                 hx-swap="none"
-                hx-on::after-request="this.className = event.detail.xhr.responseText"></span>
-                >
+                hx-on::after-request="this.className = event.detail.xhr.responseText">
                <span class="due-day"
                id="date-component-in-{{task.id}}"
                contenteditable="true"

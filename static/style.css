@@ -71,18 +71,27 @@ body {
     max-width: 90%;
 }
 
-.due-date-passed {
+.due-wrapper {
+    border-radius: 4px;
+}
+
+.past-due {
     background-color: red;
     color: white;
 }
 
-.due-date-today {
-    background-color: lightcoral;
+.due-today {
+    background-color: orange;
     color: white;
 }
 
-.due-date-tomorrow {
-    background-color: lightsalmon;
+.due-tomorrow {
+    background-color: violet;
+    color: white;
+}
+
+.due-this-week {
+    background-color: blue;
     color: white;
 }
 

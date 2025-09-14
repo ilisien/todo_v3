@@ -123,7 +123,8 @@ def update_task_due(date_part,task_id):
             return str(task.due_date.year)[-1]
 
 @app.route("/get-updated-date-warning/<int:task_id>", methods=["POST"])
-def update_task_due(task_id):
+def get_updated_date_warning(task_id):
+    time.sleep(0.5) #wait for the other request to go through before updating this
     task = Task.query.get_or_404(task_id)
     today = datetime.datetime.now().date()
     other_classes = "due-wrapper "
@@ -134,7 +135,7 @@ def update_task_due(task_id):
     elif task.due_date.date() == today + datetime.timedelta(days=1):
         other_classes += "due-tomorrow "
     elif (task.due_date.date() <= today + datetime.timedelta(days=7)):
-        other_classes += "due-in-next-week "
+        other_classes += "due-this-week "
     return other_classes
 
 @app.route("/delete-task/<int:task_id>", methods=["POST"])
