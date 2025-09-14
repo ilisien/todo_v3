@@ -12,7 +12,7 @@ body {
     min-height:100vh;
     min-width: 300px;
     flex-direction: column;
-    margin-top: 50px;
+    margin-top: 30px;
     overflow: hidden;
 }
 
@@ -33,7 +33,7 @@ body {
 
 .task-container {
     width: max(33%,350px);
-    height: calc(100vh - 300px);
+    height: calc(60vh);
     overflow-y: scroll;
 }
 
@@ -61,6 +61,7 @@ body {
     width: 100%;
     left:0;
     visibility: hidden;
+    height:25vh;
 }
 
 .centered {
