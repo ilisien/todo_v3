@@ -71,23 +71,27 @@ body {
     max-width: 90%;
 }
 
-.due-wrapper:has(.due-in-next-week) {
-    background-color: lightsalmon;
-    color: white;
+.due-wrapper {
+    border-radius: 4px;
 }
 
-.due-wrapper:has(.due-tomorrow) {
-    background-color: lightsalmon;
-    color: white;
-}
-
-.due-wrapper:has(.due-today) {
-    background-color: lightcoral;
-    color: white;
-}
-
-.due-wrapper:has(.past-due) {
+.past-due {
     background-color: red;
+    color: white;
+}
+
+.due-today {
+    background-color: orange;
+    color: white;
+}
+
+.due-tomorrow {
+    background-color: violet;
+    color: white;
+}
+
+.due-this-week {
+    background-color: blue;
     color: white;
 }
 

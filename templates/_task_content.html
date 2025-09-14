@@ -20,20 +20,53 @@
      </div>
 
      <div class="align-right">
-          <span class="due-wrapper">
-               {% set other_classes = "" %}
-               {% set today = task.due_date.now().date() %}
-               {% if task.due_date.date() < today %}
-                    {% set other_classes = other_classes ~ "past-due " %}
-               {% elif task.due_date.date() == today %}
-                    {% set other_classes = other_classes ~ "due-today " %}
-               {% elif task.due_date.date() == today.replace(day=today.day+1) %}
-                    {% set other_classes = other_classes ~ "due-tomorrow " %}
-               {% elif task.due_date.date() <= today.replace(day=today.day+7) %}
-                    {% set other_classes = other_classes ~ "due-in-next-week " %}
-               {% endif %}
-
-               {% set date_type="day" %}{% set inner_text=task.due_date.strftime('%#d') %}{% include "_date_span.html"  %}/{% set date_type="month" %}{% set inner_text=task.due_date.strftime('%#m') %}{% include "_date_span.html" %}/{% set date_type="year" %}{% set inner_text=(task.due_date.year ~ "")[-1] %}{% include "_date_span.html" %}
+          {% set other_classes = "due-wrapper " %}
+          {% set today = task.due_date.now().date() %}
+          {% if task.due_date.date() < today %}
+               {% set other_classes = other_classes ~ "past-due " %}
+          {% elif task.due_date.date() == today %}
+               {% set other_classes = other_classes ~ "due-today " %}
+          {% elif task.due_date.date() == today.replace(day=today.day+1) %}
+               {% set other_classes = other_classes ~ "due-tomorrow " %}
+          {% elif task.due_date.date() <= today.replace(day=today.day+7) %}
+               {% set other_classes = other_classes ~ "due-this-week " %}
+          {% endif %}
+          <span class="{{other_classes}}"
+                hx-post="/get-updated-date-warning/{{ task.id }}"
+                hx-trigger="blur from:#date-component-in-{{task.id}}"
+                hx-swap="none"
+                hx-on::after-request="this.className = event.detail.xhr.responseText">
+               <span class="due-day"
+               id="date-component-in-{{task.id}}"
+               contenteditable="true"
+               hx-post="/update-task-due/day/{{ task.id }}"
+               hx-trigger="blur"
+               hx-target="this"
+               hx-swap="innerHTML"
+               hx-vals='js:{"day": event.target.textContent.trim()}'
+               hx-indicator="#indicator"
+               onfocus="selectAll(this)"
+               >{{task.due_date.strftime('%#d')}}</span>/<span class="due-month"
+               id="date-component-in-{{task.id}}"
+               contenteditable="true"
+               hx-post="/update-task-due/month/{{ task.id }}"
+               hx-trigger="blur"
+               hx-target="this"
+               hx-swap="innerHTML"
+               hx-vals='js:{"month": event.target.textContent.trim()}'
+               hx-indicator="#indicator"
+               onfocus="selectAll(this)"
+               >{{task.due_date.strftime('%#m')}}</span>/<span class="due-year"
+               id="date-component-in-{{task.id}}"
+               contenteditable="true"
+               hx-post="/update-task-due/year/{{ task.id }}"
+               hx-trigger="blur"
+               hx-target="this"
+               hx-swap="innerHTML"
+               hx-vals='js:{"year": event.target.textContent.trim()}'
+               hx-indicator="#indicator"
+               onfocus="selectAll(this)"
+               >{{(task.due_date.year ~ "")[-1]}}</span>
           </span>
           <span class="delete-btn"
                hx-post="delete-task/{{ task.id }}"
