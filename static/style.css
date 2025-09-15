@@ -43,9 +43,9 @@ body {
   align-items: center;
   justify-content: flex-start;
   width: 100%;
-  min-height: 100vh;
-  min-width: 300px;
-  margin-top: 30px;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  max-height: 100vh;
   overflow-y: hidden;
 }
 
@@ -55,12 +55,19 @@ body {
   justify-content: center;
   width: var(--main-container-width);
   gap: var(--gap-md);
+  background-color: #ffffffaa;
 }
 
 .task-container {
   width: var(--main-container-width);
-  height: 60vh;
+  height: 100%;
   overflow-y: scroll;
+}
+
+.task-container::after {
+    content:"";
+    display:block;
+    height:50vh;
 }
 
 .pagebottom {
@@ -116,6 +123,7 @@ body {
   outline: none;
   display: inline;
   max-width: 90%;
+  flex-grow: 10;
 }
 
 .delete-btn {
@@ -149,14 +157,18 @@ p.description {
 
 .due-wrapper {
   border-radius: var(--border-radius-sm);
-  display: inline;
-  padding: 1px;
+  display: inline;}
+
+.due-wrapper.hidden {
+    visibility: hidden;
 }
 
 .due-day,
 .due-month,
 .due-year {
-  outline: none;
+    outline: none;
+    padding-top: 1px;
+    padding-bottom:1px;
 }
 
 .past-due {
@@ -190,10 +202,11 @@ p.description {
 .htmx-indicator {
   opacity: 0;
   transition: opacity 500ms ease-in;
-  position: absolute;
+  position: fixed;
   bottom: 0;
   left: 0;
   padding: 10px;
+  z-index: 100;
 }
 
 .htmx-indicator.htmx-request {

@@ -9,14 +9,12 @@
 {% elif task.due_date.date() <= today.replace(day=today.day+7) %}
     {% set other_classes = other_classes ~ "due-this-week " %}
 {% endif %}
-<span class="{{other_classes}}"
+<span class="{{other_classes}}{% if task.show_date %}{% else %}hidden{% endif %}"
     id="due-wrapper-{{task.id}}"
     hx-post="/get-updated-date-warning/{{ task.id }}"
     hx-trigger="blur from:#date-component-in-{{task.id}}"
     hx-swap="none"
-    hx-on::after-request="this.className = event.detail.xhr.responseText">
-    {% if task.show_date %}
-    <span class="due-day"
+    hx-on::after-request="this.className = event.detail.xhr.responseText"><span class="due-day"
     id="date-component-in-{{task.id}}"
     contenteditable="true"
     hx-post="/update-task-due/day/{{ task.id }}"
@@ -47,5 +45,4 @@
     hx-indicator="#indicator"
     onfocus="selectAll(this)"
     >{{(task.due_date.year ~ "")[-1]}}</span>
-{% else %}{% endif %}
 </span>

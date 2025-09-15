@@ -143,7 +143,7 @@ def update_task_due(date_part,task_id):
             db.session.commit()
         except:
             pass
-        return render_template("_date_span.html",task=task,date_type="day", inner_text=task.due_date.strftime('%d'))
+        return task.due_date.strftime('%d')
 
     elif date_part == "month":
         try:
@@ -151,7 +151,7 @@ def update_task_due(date_part,task_id):
             db.session.commit()
         except:
             pass
-        return render_template("_date_span.html",task=task,date_type="month", inner_text=task.due_date.strftime('%m'))
+        return task.due_date.strftime('%m')
 
     elif date_part == "year":
         try:
@@ -159,7 +159,7 @@ def update_task_due(date_part,task_id):
             db.session.commit()
         except:
             pass
-        return render_template("_date_span.html",task=task,date_type="year", inner_text=str(task.due_date.year)[-1])
+        return str(task.due_date.year)[-1]
 
 @app.route("/get-updated-date-warning/<int:task_id>", methods=["POST"])
 def get_updated_date_warning(task_id):
