@@ -7,7 +7,7 @@ from werkzeug.security import check_password_hash
 from password_hash import PASSWORD_HASH
 
 app = Flask(__name__)
-app.secret_key = secrets.token_urlsafe(128)
+app.secret_key = "secret key"
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'backend.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -58,7 +58,10 @@ def require_login():
 @app.route('/')
 def base_view():
     # Get all root tasks (tasks without parent)
-    root_tasks = sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order)
+    try:
+        root_tasks = sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order)
+    except Exception as e:
+        return f"there was an error with getting tasks: {e}"
     return render_template("todo.html", tasks=root_tasks)
 
 @app.route('/login', methods=["GET","POST"])
@@ -211,6 +214,9 @@ def delete_task(task_id):
     db.session.commit()
 
     return ""
+
+with app.app_context():
+    db.create_all()
 
 if __name__ == "__main__":
     with app.app_context():
