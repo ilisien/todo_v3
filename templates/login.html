@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+    <title>tdv3!</title>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <div class="login-wrapper">
+        <form method="post">
+            <input type="password" name="password" required>
+            <button type="submit">login</button>
+        </form>
+        {% if error %}
+            <span class="login-error">{{error}}</span>
+        {% endif %}
+    </div>
+</body>
+</html>

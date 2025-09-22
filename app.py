@@ -1,12 +1,13 @@
-import os
-import datetime, time
+import datetime, time, secrets, os
 
-from flask import Flask, redirect, url_for, request, render_template
+from flask import Flask, redirect, url_for, request, render_template, session, redirect, Response
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
-
+from werkzeug.security import check_password_hash
+from password_hash import PASSWORD_HASH
 
 app = Flask(__name__)
+app.secret_key = secrets.token_urlsafe(128)
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'backend.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -30,6 +31,7 @@ class Task(db.Model):
     description = db.Column(db.String(2048), default="")
     due_date = db.Column(db.DateTime, default=datetime.datetime.now)
 
+
 def displace_task(displacement,task_id):
     task_at_hand = Task.query.get_or_404(task_id)
     task_start_pos = task_at_hand.order
@@ -43,11 +45,36 @@ def displace_task(displacement,task_id):
         
         db.session.commit()
 
+@app.before_request
+def require_login():
+    if request.endpoint not in ("login", "static"):
+        if not session.get("authenticated"):
+            if request.headers.get("HX-Request"):
+                resp = Response("", status=200)
+                resp.headers["HX-Redirect"] = url_for("login")
+                return resp
+            return redirect(url_for("login"))
+
 @app.route('/')
 def base_view():
     # Get all root tasks (tasks without parent)
     root_tasks = sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order)
     return render_template("todo.html", tasks=root_tasks)
+
+@app.route('/login', methods=["GET","POST"])
+def login():
+    if request.method == "POST":
+        if check_password_hash(PASSWORD_HASH, request.form["password"]):
+            session["authenticated"] = True
+            return redirect(url_for("base_view"))
+        else:
+            return render_template("login.html", error="nope. try again")
+    return render_template("login.html")
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect("/login")
 
 @app.route("/create-first-task", methods=["POST"])
 def create_first_task():
