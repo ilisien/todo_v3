@@ -9,6 +9,9 @@
   --color-selection-bg: black;
   --color-selection-text: white;
   --color-white: white;
+  --color-primary: #000;
+  --color-bg: #fff;
+  --color-mid: #aaa;
 
   --color-past-due: red;
   --color-due-today: orange;
@@ -45,8 +48,10 @@ body {
   width: 100%;
   padding-top: 30px;
   padding-bottom: 30px;
-  max-height: 100vh;
+  max-height: 100dvh;
   overflow-y: hidden;
+  background-color: var(--color-bg);
+  color: var(--color-primary);
 }
 
 .centered {
@@ -55,7 +60,6 @@ body {
   justify-content: center;
   width: var(--main-container-width);
   gap: var(--gap-md);
-  background-color: #ffffffaa;
 }
 
 .task-container {
@@ -75,11 +79,16 @@ body {
   bottom: 10px;
   left: 0;
   width: 100%;
-  height: 25vh;
+  height: 15rem;
   display: flex;
   justify-content: center;
   flex-direction: row;
   visibility: hidden;
+  background-color: var(--color-bg);
+  border-top-style: dashed;
+  border-top-color: var(--color-primary);
+  border-top-width: 1px;
+  opacity: 0.9;
 }
 
 .task-item {
@@ -131,7 +140,11 @@ body {
 }
 
 .subtasks {
-  margin-left: 20px;
+  margin-left: 10.5px;
+  padding-left: 9.5px;
+  border-left-style: solid;
+  border-left-width: 1px;
+  border-left-color: var(--color-mid)
 }
 
 .description-wrapper {
@@ -174,6 +187,15 @@ p.description {
 .past-due {
   background-color: var(--color-past-due);
   color: var(--color-white);
+  /*
+  background:
+  repeating-linear-gradient(
+    45deg,           angle 
+    var(--color-mid) 0px,
+    var(--color-mid) 2px,
+    transparent 2px,
+    transparent 4px
+  )*/
 }
 
 .due-today {
