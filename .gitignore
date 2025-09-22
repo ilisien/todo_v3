@@ -1,3 +1,5 @@
 *.db
 __pycache__/
 password_hash.py
+wsgi.py
+env/
