@@ -123,7 +123,7 @@ input {
   border-top-style: dashed;
   border-top-color: var(--color-primary);
   border-top-width: 1px;
-  opacity: 0.9;
+  opacity: 0.7;
 }
 
 .task-item {

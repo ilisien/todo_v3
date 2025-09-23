@@ -61,7 +61,7 @@ def base_view():
     try:
         root_tasks = sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order)
     except Exception as e:
-        return f"there was an error with getting tasks: {e}"
+        return f"there was an error with getting initial tasks: {e}"
     return render_template("todo.html", tasks=root_tasks)
 
 @app.route('/login', methods=["GET","POST"])
