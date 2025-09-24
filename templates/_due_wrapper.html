@@ -1,18 +1,7 @@
-{% set other_classes = "due-wrapper " %}
-{% set today = task.due_date.now().date() %}
-{% if task.due_date.date() < today %}
-    {% set other_classes = other_classes ~ "past-due " %}
-{% elif task.due_date.date() == today %}
-    {% set other_classes = other_classes ~ "due-today " %}
-{% elif task.due_date.date() == today.replace(day=today.day+1) %}
-    {% set other_classes = other_classes ~ "due-tomorrow " %}
-{% elif task.due_date.date() <= today.replace(day=today.day+7) %}
-    {% set other_classes = other_classes ~ "due-this-week " %}
-{% endif %}
 <span class="{{other_classes}}{% if task.show_date %}{% else %}hidden{% endif %}"
     id="due-wrapper-{{task.id}}"
     hx-post="/get-updated-date-warning/{{ task.id }}"
-    hx-trigger="blur from:#date-component-in-{{task.id}}"
+    hx-trigger="load, blur from:#date-component-in-{{task.id}}"
     hx-swap="none"
     hx-on::after-request="this.className = event.detail.xhr.responseText"><span class="due-day"
     id="date-component-in-{{task.id}}"

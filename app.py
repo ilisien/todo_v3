@@ -133,7 +133,17 @@ def refresh(to_refresh,task_id):
     time.sleep(0.5)
     task = Task.query.get_or_404(task_id)
     if to_refresh == "date":
-        return render_template("_due_wrapper.html", task=task)
+        today = datetime.datetime.now().date()
+        other_classes = "due-wrapper "
+        if task.due_date.date() < today:
+            other_classes += "past-due "
+        elif task.due_date.date() == today:
+            other_classes += "due-today "
+        elif task.due_date.date() == today + datetime.timedelta(days=1):
+            other_classes += "due-tomorrow "
+        elif (task.due_date.date() <= today + datetime.timedelta(days=7)):
+            other_classes += "due-this-week "
+        return render_template("_due_wrapper.html",other_classes=other_classes, task=task)
     if to_refresh == "complete":
         return render_template("_completed.html", task=task)
 
