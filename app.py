@@ -133,18 +133,10 @@ def refresh(to_refresh,task_id):
     time.sleep(0.5)
     task = Task.query.get_or_404(task_id)
     if to_refresh == "date":
-        today = datetime.datetime.now().date()
-        other_classes = "due-wrapper "
-        if task.due_date.date() < today:
-            other_classes += "past-due "
-        elif task.due_date.date() == today:
-            other_classes += "due-today "
-        elif task.due_date.date() == today + datetime.timedelta(days=1):
-            other_classes += "due-tomorrow "
-        elif (task.due_date.date() <= today + datetime.timedelta(days=7)):
-            other_classes += "due-this-week "
+        other_classes = get_updated_date_warning(task_id)
         return render_template("_due_wrapper.html",other_classes=other_classes, task=task)
     if to_refresh == "complete":
+        task = Task.query.get_or_404(task_id)
         return render_template("_completed.html", task=task)
 
 
@@ -201,21 +193,25 @@ def update_task_due(date_part,task_id):
             pass
         return str(task.due_date.year)[-1]
 
-@app.route("/get-updated-date-warning/<int:task_id>", methods=["POST"])
+@app.route("/get-updated-date-warning/<int:task_id>/", methods=["POST"])
 def get_updated_date_warning(task_id):
-    time.sleep(0.5) #wait for the other request to go through before updating this
     task = Task.query.get_or_404(task_id)
-    today = datetime.datetime.now().date()
+
     other_classes = "due-wrapper "
-    if task.due_date.date() < today:
-        other_classes += "past-due "
-    elif task.due_date.date() == today:
-        other_classes += "due-today "
-    elif task.due_date.date() == today + datetime.timedelta(days=1):
-        other_classes += "due-tomorrow "
-    elif (task.due_date.date() <= today + datetime.timedelta(days=7)):
-        other_classes += "due-this-week "
-    return other_classes
+    if task.show_date:
+        today = datetime.datetime.now().date()
+        if task.due_date.date() < today:
+            other_classes += "past-due "
+        elif task.due_date.date() == today:
+            other_classes += "due-today "
+        elif task.due_date.date() == today + datetime.timedelta(days=1):
+            other_classes += "due-tomorrow "
+        elif (task.due_date.date() <= today + datetime.timedelta(days=7)):
+            other_classes += "due-this-week "
+        return other_classes
+    else:
+        other_classes += "hidden "
+        return other_classes
 
 @app.route("/delete-task/<int:task_id>", methods=["POST"])
 def delete_task(task_id):
