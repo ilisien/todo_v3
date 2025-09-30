@@ -1,4 +1,4 @@
-<span class="completed" 
+<span class="completed {% if task.show_as_task %}{% if task.completed %}done{% else %}todo{% endif %}{% else %}list-item{% endif %}" 
     id="completed-{{task.id}}"
     hx-post="/toggle-task/{{ task.id }}"
     hx-target="#task-content-{{ task.id }}"
