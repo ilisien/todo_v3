@@ -249,23 +249,18 @@ p.description {
 }
 
 .task-content-wrapper:has(.done) > .align-left  {
-  color: var(--color-placeholder);
-  text-decoration: line-through;
-}
-
-.task-content-wrapper:has(.done) > .align-right  {
-  color: var(--color-placeholder);
-  text-decoration: line-through;
-
-  .due-wrapper {
-    background-color: var(--color-bg);
+  .name {
     color: var(--color-placeholder);
+    text-decoration: line-through;
   }
 }
 
-.delete-btn {
-  color: var(--color-primary);
-  text-decoration: none;
+.task-content-wrapper:has(.done) > .align-right  {
+  .due-wrapper {
+    background-color: var(--color-bg);
+    color: var(--color-placeholder);
+    text-decoration: line-through;
+  }
 }
 
 .option {
