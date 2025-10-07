@@ -45,14 +45,23 @@ def displace_task(displacement,task_id):
         
         db.session.commit()
 
-def filter_children(task):
-    task.children = [filter_children(child) for child in task.children if not child.completed]
-    return task
+
 
 def get_incomplete_task_tree():
     root_tasks = Task.query.filter_by(parent_id=None, completed=False).order_by(Task.order).all()
     
+    def filter_children(task):
+        task.children = [filter_children(child) for child in task.children if not child.completed]
+        return task
+
     return [filter_children(task) for task in root_tasks]
+
+def attach_other_classes(tasks):
+    for task in tasks:
+        task.other_classes = get_updated_date_warning(task.id)
+        for child in getattr(task, 'children', []):
+            attach_other_classes([child])
+    return tasks
 
 @app.before_request
 def require_login():
@@ -69,7 +78,7 @@ def base_view():
     # Get all root tasks (tasks without parent)
     session['show_completed_tasks'] = True
     try:
-        root_tasks = sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order)
+        root_tasks = attach_other_classes(sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order))
     except Exception as e:
         return f"there was an error with getting initial tasks: {e}"
     return render_template("todo.html", tasks=root_tasks)
@@ -233,11 +242,11 @@ def delete_task(task_id):
 
 @app.route("/toggle-completed-tasks/",methods=["POST"])
 def toggle_completed_tasks():
-    session['show_completed_tasks'] = not session['show_completed_tasks']
     if session['show_completed_tasks']:
-        root_tasks = get_incomplete_task_tree()
+        root_tasks = attach_other_classes(get_incomplete_task_tree())
     else:
-        root_tasks = sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order)
+        root_tasks = attach_other_classes(sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order))
+    session['show_completed_tasks'] = not session['show_completed_tasks']
     return render_template("_task_list.html", tasks=root_tasks, )
 
 with app.app_context():
