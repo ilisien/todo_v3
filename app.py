@@ -45,6 +45,15 @@ def displace_task(displacement,task_id):
         
         db.session.commit()
 
+def filter_children(task):
+    task.children = [filter_children(child) for child in task.children if not child.completed]
+    return task
+
+def get_incomplete_task_tree():
+    root_tasks = Task.query.filter_by(parent_id=None, completed=False).order_by(Task.order).all()
+    
+    return [filter_children(task) for task in root_tasks]
+
 @app.before_request
 def require_login():
     if request.endpoint not in ("login", "static"):
@@ -58,6 +67,7 @@ def require_login():
 @app.route('/')
 def base_view():
     # Get all root tasks (tasks without parent)
+    session['show_completed_tasks'] = True
     try:
         root_tasks = sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order)
     except Exception as e:
@@ -220,6 +230,15 @@ def delete_task(task_id):
     db.session.commit()
 
     return ""
+
+@app.route("/toggle-completed-tasks/",methods=["POST"])
+def toggle_completed_tasks():
+    session['show_completed_tasks'] = not session['show_completed_tasks']
+    if session['show_completed_tasks']:
+        root_tasks = get_incomplete_task_tree()
+    else:
+        root_tasks = sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order)
+    return render_template("_task_list.html", tasks=root_tasks, )
 
 with app.app_context():
     db.create_all()
