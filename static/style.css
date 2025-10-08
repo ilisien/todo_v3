@@ -103,8 +103,7 @@ input {
   overflow-y: scroll;
 }
 
-.task-container::after {
-    content:"";
+.task-list-after {
     display:block;
     height:50vh;
 }

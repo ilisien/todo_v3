@@ -45,7 +45,12 @@ def displace_task(displacement,task_id):
         
         db.session.commit()
 
-
+def get_correct_root_tasks():
+    if not session['show_completed_tasks']:
+        root_tasks = attach_other_classes(get_incomplete_task_tree())
+    else:
+        root_tasks = attach_other_classes(sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order))
+    return root_tasks
 
 def get_incomplete_task_tree():
     root_tasks = Task.query.filter_by(parent_id=None, completed=False).order_by(Task.order).all()
@@ -107,7 +112,7 @@ def create_first_task():
     db.session.commit()
     
     # Return the new task wrapped in the task list
-    root_tasks = sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order)
+    root_tasks = get_correct_root_tasks()
     return render_template("_task_list.html", tasks=root_tasks)
 
 @app.route("/create-subtask/<int:parent_id>", methods=["POST"])
@@ -242,11 +247,8 @@ def delete_task(task_id):
 
 @app.route("/toggle-completed-tasks/",methods=["POST"])
 def toggle_completed_tasks():
-    if session['show_completed_tasks']:
-        root_tasks = attach_other_classes(get_incomplete_task_tree())
-    else:
-        root_tasks = attach_other_classes(sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order))
     session['show_completed_tasks'] = not session['show_completed_tasks']
+    root_tasks=get_correct_root_tasks()
     return render_template("_task_list.html", tasks=root_tasks, )
 
 with app.app_context():
