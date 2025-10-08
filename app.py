@@ -126,7 +126,7 @@ def create_subtask(parent_id):
     db.session.add(new_task)
     db.session.commit()
     
-    return render_template("_task.html", task=new_task)
+    return render_template("_task.html", task=attach_other_classes([new_task])[0])
 
 @app.route("/toggle-task/<int:task_id>", methods=["POST"])
 def toggle_task(task_id):

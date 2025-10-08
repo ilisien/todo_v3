@@ -1,4 +1,4 @@
-<span class="{{task.other_classes}}"
+<span class="{{task.other_classes}}{{other_classes}}"
     id="due-wrapper-{{task.id}}"
     hx-post="/get-updated-date-warning/{{ task.id }}"
     hx-trigger="htmx:afterRequest from:#date-component-in-{{task.id}}"
