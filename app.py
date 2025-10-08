@@ -187,7 +187,7 @@ def move_task(task_id):
     displace_task(int(request.form.get('displacement', '')),task_id)
     
     # This probably doesn't require a full re-render, but i'm not ready to figure out how to not to this yet
-    root_tasks = sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order)
+    root_tasks = get_correct_root_tasks()
     return render_template("_task_list.html", tasks=root_tasks)
 
 @app.route("/update-task-due/<string:date_part>/<int:task_id>", methods=["POST"])
