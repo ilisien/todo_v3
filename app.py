@@ -32,10 +32,11 @@ class Task(db.Model):
     due_date = db.Column(db.DateTime, default=datetime.datetime.now)
 
 
-def displace_task(displacement,task_id):
+def displace_task(displacement,task_id,task_new_pos=None):
     task_at_hand = Task.query.get_or_404(task_id)
     task_start_pos = task_at_hand.order
-    task_new_pos = task_start_pos + displacement
+    if task_new_pos is None:
+        task_new_pos = task_start_pos + displacement
     siblings_of_task = sorted(Task.query.filter_by(parent_id=task_at_hand.parent_id).all(),key=lambda x: x.order)
     if 0 <= task_new_pos <= len(siblings_of_task)-1:
         siblings_of_task.insert(task_new_pos,siblings_of_task.pop(task_start_pos))
@@ -103,13 +104,15 @@ def logout():
     session.clear()
     return redirect("/login")
 
-@app.route("/create-first-task", methods=["POST"])
-def create_first_task():
+@app.route("/create-first-task/<int:position>", methods=["POST"])
+def create_first_task(position):
     # Create first root task
     how_many_other_roots = len(Task.query.filter_by(parent_id=None).all())
     new_task = Task(name="",order=how_many_other_roots)
     db.session.add(new_task)
     db.session.commit()
+    if position == 0:
+        displace_task(None,new_task.id,0)
     
     # Return the new task wrapped in the task list
     root_tasks = get_correct_root_tasks()
