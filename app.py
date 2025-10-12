@@ -31,6 +31,23 @@ class Task(db.Model):
     description = db.Column(db.String(2048), default="")
     due_date = db.Column(db.DateTime, default=datetime.datetime.now)
 
+    def get_due_classes(self):
+        classes = "due-wrapper "
+        if self.show_date:
+            today = datetime.datetime.now().date()
+            if self.due_date.date() < today:
+                classes += "past-due "
+            elif self.due_date.date() == today:
+                classes += "due-today "
+            elif self.due_date.date() == today + datetime.timedelta(days=1):
+                classes += "due-tomorrow "
+            elif self.due_date.date() <= today + datetime.timedelta(days=7):
+                classes += "due-this-week "
+            return classes
+        else:
+            classes += "hidden "
+            return classes
+
 
 def displace_task(displacement,task_id,task_new_pos=None):
     task_at_hand = Task.query.get_or_404(task_id)
@@ -48,9 +65,9 @@ def displace_task(displacement,task_id,task_new_pos=None):
 
 def get_correct_root_tasks():
     if not session['show_completed_tasks']:
-        root_tasks = attach_other_classes(get_incomplete_task_tree())
+        root_tasks = get_incomplete_task_tree()
     else:
-        root_tasks = attach_other_classes(sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order))
+        root_tasks = sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order)
     return root_tasks
 
 def get_incomplete_task_tree():
@@ -61,13 +78,6 @@ def get_incomplete_task_tree():
         return task
 
     return [filter_children(task) for task in root_tasks]
-
-def attach_other_classes(tasks):
-    for task in tasks:
-        task.other_classes = get_updated_date_warning(task.id)
-        for child in getattr(task, 'children', []):
-            attach_other_classes([child])
-    return tasks
 
 @app.before_request
 def require_login():
@@ -84,7 +94,7 @@ def base_view():
     # Get all root tasks (tasks without parent)
     session['show_completed_tasks'] = True
     try:
-        root_tasks = attach_other_classes(sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order))
+        root_tasks = sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order)
     except Exception as e:
         return f"there was an error with getting initial tasks: {e}"
     return render_template("todo.html", tasks=root_tasks)
@@ -126,7 +136,7 @@ def create_subtask(parent_id):
     db.session.add(new_task)
     db.session.commit()
     
-    return render_template("_task.html", task=attach_other_classes([new_task])[0])
+    return render_template("_task.html", task=new_task)
 
 @app.route("/toggle-task/<int:task_id>", methods=["POST"])
 def toggle_task(task_id):
@@ -160,12 +170,9 @@ def refresh(to_refresh,task_id):
     time.sleep(0.5)
     task = Task.query.get_or_404(task_id)
     if to_refresh == "date":
-        other_classes = get_updated_date_warning(task_id)
-        return render_template("_due_wrapper.html",other_classes=other_classes, task=task)
+        return render_template("_due_wrapper.html", task=task)
     if to_refresh == "complete":
-        task = Task.query.get_or_404(task_id)
-        other_classes = get_updated_date_warning(task_id)
-        return render_template("_completed.html",other_classes=other_classes, task=task)
+        return render_template("_completed.html", task=task)
 
 
 @app.route("/update-task-option/<string:option>/<int:task_id>", methods=["POST"])
