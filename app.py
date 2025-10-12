@@ -164,7 +164,8 @@ def refresh(to_refresh,task_id):
         return render_template("_due_wrapper.html",other_classes=other_classes, task=task)
     if to_refresh == "complete":
         task = Task.query.get_or_404(task_id)
-        return render_template("_completed.html", task=task)
+        other_classes = get_updated_date_warning(task_id)
+        return render_template("_completed.html",other_classes=other_classes, task=task)
 
 
 @app.route("/update-task-option/<string:option>/<int:task_id>", methods=["POST"])
