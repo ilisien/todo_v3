@@ -92,7 +92,7 @@ def require_login():
 @app.route('/')
 def base_view():
     # Get all root tasks (tasks without parent)
-    session['show_completed_tasks'] = True
+    session['show_completed_tasks'] = False
     try:
         root_tasks = sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order)
     except Exception as e:
@@ -135,6 +135,7 @@ def create_subtask(parent_id):
     new_task = Task(name="", parent_id=parent_id,order=how_many_siblings)
     db.session.add(new_task)
     db.session.commit()
+    #displace_task(None,new_task.id,0)
     
     return render_template("_task.html", task=new_task)
 
