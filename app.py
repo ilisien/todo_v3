@@ -94,7 +94,7 @@ def base_view():
     # Get all root tasks (tasks without parent)
     session['show_completed_tasks'] = False
     try:
-        root_tasks = sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order)
+        root_tasks = get_correct_root_tasks()
     except Exception as e:
         return f"there was an error with getting initial tasks: {e}"
     return render_template("todo.html", tasks=root_tasks)
