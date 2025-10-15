@@ -1,0 +1,27 @@
+<div id="filter-tabs">
+    {% include '_filter_tabs.html' %}
+</div>
+
+<div class="task-container">
+    <div id="task-list"
+         hx-post="/create-first-task/0"
+         hx-target="#task-list"
+         hx-trigger="keydown[key=='Enter' && event.target.tagName == 'BODY'] from:body"
+         hx-swap="innerHTML"
+         hx-indicator="#indicator">
+        {% if tasks %}
+            {% include '_task_list.html' %}
+        {% else %}
+            <div class="empty-state">
+                press [Enter] to create your first task
+            </div>
+        {% endif %}
+    </div>
+    <div class="task-list-after" 
+        id="task-list-after"
+        hx-post="/create-first-task/1"
+        hx-target="#task-list"
+        hx-trigger="click"
+        hx-swap="innerHTML"
+        hx-indicator="#indicator"></div>
+</div>

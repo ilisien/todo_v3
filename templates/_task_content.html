@@ -17,6 +17,23 @@
                     hx-swap="innerHTML"
                     hx-trigger="click"
                     hx-indicator="#indicator">{% if task.show_as_task %}[x] showing as task{% else %}[ ] showing as list item{% endif %}</span>
+               
+               <!-- Tags Field -->
+               <div class="tags-wrapper">
+                    <span class="tags-label">tags:</span>
+                    <p class="tags editable" 
+                       id="tags-{{task.id}}"
+                       contenteditable="true"
+                       data-placeholder="untagged ..."
+                       hx-post="/update-task-tags/{{ task.id }}"
+                       hx-trigger="blur"
+                       hx-target="this"
+                       hx-swap="innerHTML"
+                       hx-vals='js:{"tags": event.target.textContent.trim()}'
+                       hx-indicator="#indicator"
+                       hx-on::after-request="htmx.trigger('#filter-tabs', 'refresh-tabs')">{{task.get_tags_display()}}</p>
+               </div>
+
                <div class="description-wrapper">
                     <p class="description editable" 
                     contenteditable="true"
@@ -97,4 +114,13 @@
       hx-target="#due-wrapper-{{task.id}}"
       hx-swap="outerHTML"
       hx-trigger="click from:#date-toggle-{{task.id}}"
+      hx-indicator="#indicator"></form>
+
+<!-- Handle refreshing filter tabs after tag changes -->
+<form style="display: none;" 
+      id="refresh-tabs-form"
+      hx-post="/refresh-tabs"
+      hx-target="#filter-tabs"
+      hx-swap="innerHTML"
+      hx-trigger="refresh-tabs from:#filter-tabs"
       hx-indicator="#indicator"></form>

@@ -29,7 +29,25 @@ class Task(db.Model):
 
     name = db.Column(db.String(512), nullable=False, default="")
     description = db.Column(db.String(2048), default="")
+    tags = db.Column(db.String(512), default="")  # NEW: comma-separated tags
     due_date = db.Column(db.DateTime, default=datetime.datetime.now)
+
+    def get_tags(self):
+        """Return list of tags"""
+        if not self.tags:
+            return []
+        return [tag.strip() for tag in self.tags.split(',') if tag.strip()]
+    
+    def set_tags(self, tags_list):
+        """Set tags from a list"""
+        if isinstance(tags_list, str):
+            # If string, clean it up
+            tags_list = [tag.strip() for tag in tags_list.split(',') if tag.strip()]
+        self.tags = ', '.join(tags_list)
+    
+    def get_tags_display(self):
+        """Return tags as display string"""
+        return self.tags if self.tags else ""
 
     def get_due_classes(self):
         classes = "due-wrapper "
@@ -49,6 +67,142 @@ class Task(db.Model):
             return classes
 
 
+class AppState(db.Model):
+    """Store application state for single-user app"""
+    __tablename__ = "app_state"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    show_completed = db.Column(db.Boolean, default=True)
+    active_tags = db.Column(db.String(1024), default="")  # comma-separated list of active tags
+    
+    def get_active_tags(self):
+        """Return list of active filter tags"""
+        if not self.active_tags:
+            return []
+        return [tag.strip() for tag in self.active_tags.split(',') if tag.strip()]
+    
+    def set_active_tags(self, tags_list):
+        """Set active tags from a list"""
+        if isinstance(tags_list, list):
+            self.active_tags = ','.join(tags_list)
+        else:
+            self.active_tags = tags_list
+
+
+def get_default_filters():
+    """Return default filter state"""
+    return {
+        'show_completed': True,
+        'active_tags': ""  # Store as empty string, not list
+    }
+
+
+def load_filters():
+    """Load filter state from database"""
+    state = AppState.query.first()
+    if not state:
+        # Create default state
+        defaults = get_default_filters()
+        state = AppState(
+            show_completed=defaults['show_completed'],
+            active_tags=defaults['active_tags']
+        )
+        db.session.add(state)
+        db.session.commit()
+    
+    return {
+        'show_completed': state.show_completed,
+        'active_tags': state.get_active_tags()
+    }
+
+
+def save_filters(show_completed=None, active_tags=None):
+    """Save filter state to database"""
+    state = AppState.query.first()
+    if not state:
+        state = AppState()
+        db.session.add(state)
+    
+    if show_completed is not None:
+        state.show_completed = show_completed
+    
+    if active_tags is not None:
+        state.set_active_tags(active_tags)
+    
+    db.session.commit()
+
+
+def get_all_tags():
+    """Get all unique tags across all tasks"""
+    all_tasks = Task.query.all()
+    tags = set()
+    for task in all_tasks:
+        tags.update(task.get_tags())
+    return sorted(list(tags))
+
+
+def apply_filters(tasks, filters):
+    """Apply filters to task list
+    
+    Tag filtering: Show tasks that match tag + ALL their descendants
+                   Also show descendants that match (promoted to root level)
+    Completion filtering: Apply to all tasks in hierarchy
+    """
+    active_tags = filters.get('active_tags', [])
+    show_completed = filters.get('show_completed', True)
+    
+    # First, apply completion filtering if needed
+    if not show_completed:
+        def filter_completed(task):
+            """Recursively filter out completed tasks"""
+            task.children = [filter_completed(child) for child in task.children if not child.completed]
+            return task
+        
+        tasks = [task for task in tasks if not task.completed]
+        tasks = [filter_completed(task) for task in tasks]
+    
+    # Then, apply tag filtering
+    if active_tags:
+        def filter_by_tags(task, parent_matched=False):
+            """
+            Recursively filter tasks by tags.
+            If parent matched, keep all children.
+            If parent didn't match, only keep children that match (and promote them).
+            """
+            task_tags = task.get_tags()
+            task_matches = any(tag in active_tags for tag in task_tags)
+            
+            if parent_matched or task_matches:
+                # This task should be shown - keep ALL its children
+                return task
+            else:
+                # This task doesn't match - check if any children match
+                # If children match, they get promoted
+                matching_children = []
+                for child in task.children:
+                    filtered = filter_by_tags(child, parent_matched=False)
+                    if filtered:
+                        matching_children.append(filtered)
+                
+                # Don't show this task, but return its matching children to be promoted
+                return matching_children if matching_children else None
+        
+        filtered_tasks = []
+        for task in tasks:
+            result = filter_by_tags(task, parent_matched=False)
+            if result:
+                if isinstance(result, list):
+                    # Children were promoted
+                    filtered_tasks.extend(result)
+                else:
+                    # Task itself matched
+                    filtered_tasks.append(result)
+        
+        return filtered_tasks
+    
+    return tasks
+
+
 def displace_task(displacement,task_id,task_new_pos=None):
     task_at_hand = Task.query.get_or_404(task_id)
     task_start_pos = task_at_hand.order
@@ -63,21 +217,13 @@ def displace_task(displacement,task_id,task_new_pos=None):
         
         db.session.commit()
 
+
 def get_correct_root_tasks():
-    if not session['show_completed_tasks']:
-        root_tasks = get_incomplete_task_tree()
-    else:
-        root_tasks = sorted(Task.query.filter_by(parent_id=None).all(),key=lambda x: x.order)
-    return root_tasks
+    """Get root tasks with current filters applied"""
+    filters = load_filters()
+    root_tasks = sorted(Task.query.filter_by(parent_id=None).all(), key=lambda x: x.order)
+    return apply_filters(root_tasks, filters)
 
-def get_incomplete_task_tree():
-    root_tasks = Task.query.filter_by(parent_id=None, completed=False).order_by(Task.order).all()
-    
-    def filter_children(task):
-        task.children = [filter_children(child) for child in task.children if not child.completed]
-        return task
-
-    return [filter_children(task) for task in root_tasks]
 
 @app.before_request
 def require_login():
@@ -89,15 +235,22 @@ def require_login():
                 return resp
             return redirect(url_for("login"))
 
+
 @app.route('/')
 def base_view():
-    # Get all root tasks (tasks without parent)
-    session['show_completed_tasks'] = False
+    """Main view with filter tabs and task list"""
     try:
+        filters = load_filters()
         root_tasks = get_correct_root_tasks()
+        all_tags = get_all_tags()
+        
+        return render_template("todo.html", 
+                             tasks=root_tasks, 
+                             all_tags=all_tags,
+                             filters=filters)
     except Exception as e:
         return f"there was an error with getting initial tasks: {e}"
-    return render_template("todo.html", tasks=root_tasks)
+
 
 @app.route('/login', methods=["GET","POST"])
 def login():
@@ -109,10 +262,12 @@ def login():
             return render_template("login.html", error="nope. try again")
     return render_template("login.html")
 
+
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect("/login")
+
 
 @app.route("/create-first-task/<int:position>", methods=["POST"])
 def create_first_task(position):
@@ -128,6 +283,7 @@ def create_first_task(position):
     root_tasks = get_correct_root_tasks()
     return render_template("_task_list.html", tasks=root_tasks)
 
+
 @app.route("/create-subtask/<int:parent_id>", methods=["POST"])
 def create_subtask(parent_id):
     # Create new subtask
@@ -135,9 +291,9 @@ def create_subtask(parent_id):
     new_task = Task(name="", parent_id=parent_id,order=how_many_siblings)
     db.session.add(new_task)
     db.session.commit()
-    #displace_task(None,new_task.id,0)
     
     return render_template("_task.html", task=new_task)
+
 
 @app.route("/toggle-task/<int:task_id>", methods=["POST"])
 def toggle_task(task_id):
@@ -148,14 +304,15 @@ def toggle_task(task_id):
     # Return the updated task content
     return render_template("_task_content.html", task=task)
 
+
 @app.route("/update-task-name/<int:task_id>", methods=["POST"])
 def update_task_name(task_id):
     task = Task.query.get_or_404(task_id)
     task.name = request.form.get('name', '')
     db.session.commit()
     
-    # Return the updated task
     return task.name
+
 
 @app.route("/update-task-description/<int:task_id>", methods=["POST"])
 def update_task_description(task_id):
@@ -163,8 +320,19 @@ def update_task_description(task_id):
     task.description = request.form.get('description', '')
     db.session.commit()
     
-    # Return the updated task
     return task.description
+
+
+@app.route("/update-task-tags/<int:task_id>", methods=["POST"])
+def update_task_tags(task_id):
+    """Update task tags"""
+    task = Task.query.get_or_404(task_id)
+    tags_string = request.form.get('tags', '')
+    task.set_tags(tags_string)
+    db.session.commit()
+    
+    return task.get_tags_display()
+
 
 @app.route("/refresh/<string:to_refresh>/<int:task_id>", methods=["POST"])
 def refresh(to_refresh,task_id):
@@ -194,13 +362,14 @@ def update_task_option(option,task_id):
     db.session.commit()
     return return_string
 
+
 @app.route("/move-task/<int:task_id>", methods=["POST"])
 def move_task(task_id):
     displace_task(int(request.form.get('displacement', '')),task_id)
     
-    # This probably doesn't require a full re-render, but i'm not ready to figure out how to not to this yet
     root_tasks = get_correct_root_tasks()
     return render_template("_task_list.html", tasks=root_tasks)
+
 
 @app.route("/update-task-due/<string:date_part>/<int:task_id>", methods=["POST"])
 def update_task_due(date_part,task_id):
@@ -229,6 +398,7 @@ def update_task_due(date_part,task_id):
             pass
         return str(task.due_date.year)[-1]
 
+
 @app.route("/get-updated-date-warning/<int:task_id>/", methods=["POST"])
 def get_updated_date_warning(task_id):
     task = Task.query.get_or_404(task_id)
@@ -249,6 +419,7 @@ def get_updated_date_warning(task_id):
         other_classes += "hidden "
         return other_classes
 
+
 @app.route("/delete-task/<int:task_id>", methods=["POST"])
 def delete_task(task_id):
     task = Task.query.get_or_404(task_id)
@@ -257,11 +428,59 @@ def delete_task(task_id):
 
     return ""
 
-@app.route("/toggle-completed-tasks/",methods=["POST"])
-def toggle_completed_tasks():
-    session['show_completed_tasks'] = not session['show_completed_tasks']
-    root_tasks=get_correct_root_tasks()
-    return render_template("_task_list.html", tasks=root_tasks, )
+
+@app.route("/set-filter/<filter_type>/<filter_value>", methods=["POST"])
+def set_filter(filter_type, filter_value):
+    """Update filter state and return updated content"""
+    filters = load_filters()
+    
+    if filter_type == "completed":
+        # Toggle completed filter
+        new_value = filter_value.lower() == "true"
+        save_filters(show_completed=new_value)
+        filters['show_completed'] = new_value
+    
+    elif filter_type == "tag":
+        # Toggle tag filter
+        active_tags = filters['active_tags']
+        if filter_value == "all":
+            # Clear all tag filters
+            active_tags = []
+        elif filter_value in active_tags:
+            # Remove tag from filters
+            active_tags.remove(filter_value)
+        else:
+            # Add tag to filters
+            active_tags.append(filter_value)
+        
+        save_filters(active_tags=active_tags)
+        filters['active_tags'] = active_tags
+    
+    # Return both tabs and task list
+    root_tasks = get_correct_root_tasks()
+    all_tags = get_all_tags()
+    
+    print(f"Filter changed: {filter_type}={filter_value}")
+    print(f"Active tags: {filters['active_tags']}")
+    print(f"Show completed: {filters['show_completed']}")
+    print(f"Returning {len(root_tasks)} tasks")
+    
+    return render_template("_main_content.html", 
+                         tasks=root_tasks, 
+                         all_tags=all_tags,
+                         filters=filters)
+
+
+@app.route("/refresh-tabs", methods=["POST"])
+def refresh_tabs():
+    """Return just the filter tabs (for after tag edits)"""
+    filters = load_filters()
+    all_tags = get_all_tags()
+    
+    return render_template("_filter_tabs.html", 
+                         all_tags=all_tags,
+                         filters=filters)
+
 
 with app.app_context():
     db.create_all()
@@ -269,4 +488,4 @@ with app.app_context():
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-    app.run(debug=True,host='0.0.0.0') #,host='0.0.0.0'
+    app.run(debug=True,host='0.0.0.0')

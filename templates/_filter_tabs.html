@@ -1,0 +1,38 @@
+<div class="filter-tabs-container">
+    <div class="filter-tabs">
+        <!-- All Tasks Tab -->
+        <span class="filter-tab {% if not filters.active_tags %}active{% endif %}"
+              tabindex="0"
+              hx-post="/set-filter/tag/all"
+              hx-target="#main-content"
+              hx-swap="innerHTML"
+              hx-trigger="click"
+              hx-indicator="#indicator">
+            All Tasks
+        </span>
+
+        <!-- Individual Tag Tabs -->
+        {% for tag in all_tags %}
+        <span class="filter-tab {% if tag in filters.active_tags %}active{% endif %}"
+              tabindex="0"
+              hx-post="/set-filter/tag/{{ tag }}"
+              hx-target="#main-content"
+              hx-swap="innerHTML"
+              hx-trigger="click"
+              hx-indicator="#indicator">
+            {{ tag }}
+        </span>
+        {% endfor %}
+    </div>
+
+    <!-- Completed Toggle -->
+    <span class="toggle-completed-tasks {% if not filters.show_completed %}active{% endif %}"
+          tabindex="0"
+          hx-post="/set-filter/completed/{% if filters.show_completed %}false{% else %}true{% endif %}"
+          hx-target="#main-content"
+          hx-swap="innerHTML"
+          hx-trigger="click"
+          hx-indicator="#indicator">
+        {% if filters.show_completed %}Hide{% else %}Show{% endif %} Completed
+    </span>
+</div>
