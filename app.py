@@ -66,7 +66,6 @@ class Task(db.Model):
             classes += "hidden "
             return classes
 
-
 class AppState(db.Model):
     """Store application state for single-user app"""
     __tablename__ = "app_state"
@@ -88,14 +87,12 @@ class AppState(db.Model):
         else:
             self.active_tags = tags_list
 
-
 def get_default_filters():
     """Return default filter state"""
     return {
         'show_completed': True,
         'active_tags': ""  # Store as empty string, not list
     }
-
 
 def load_filters():
     """Load filter state from database"""

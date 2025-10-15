@@ -284,6 +284,11 @@ p.description {
   padding: 10px;
 }
 
+.toggle-completed-tasks.active {
+    color: var(--color-warning);
+}
+
+
 .htmx-indicator {
   opacity: 0;
   transition: opacity 500ms ease-in;
@@ -306,8 +311,6 @@ p.description {
     justify-content: space-between;
     gap: 1rem;
     padding: 1rem;
-    border-bottom: 1px solid #e0e0e0;
-    background-color: #fafafa;
     flex-wrap: wrap;
 }
 
@@ -319,9 +322,6 @@ p.description {
 }
 
 .filter-tab {
-    padding: 0.5rem 1rem;
-    border: 1px solid #d0d0d0;
-    background-color: white;
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.9rem;
@@ -336,58 +336,19 @@ p.description {
 .filter-tab.active {
     background-color: #4a90e2;
     color: white;
-    border-color: #4a90e2;
-}
-
-.toggle-completed-tasks {
-    padding: 0.5rem 1rem;
-    border: 1px solid #d0d0d0;
-    background-color: white;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-}
-
-.toggle-completed-tasks:hover {
-    background-color: #f0f0f0;
-    border-color: #a0a0a0;
-}
-
-.toggle-completed-tasks.active {
-    background-color: #e74c3c;
-    color: white;
-    border-color: #e74c3c;
 }
 
 /* Tags Field Styling */
 .tags-wrapper {
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin: 0.5rem 0;
-    padding: 0.5rem;
-    background-color: #f9f9f9;
-    border-radius: 4px;
+    gap:15px;
 }
 
 .tags-label {
-    font-size: 0.85rem;
-    color: #666;
-    font-weight: 500;
     white-space: nowrap;
 }
 
 .tags.editable {
-    flex: 1;
-    min-height: 1.5rem;
-    padding: 0.3rem 0.5rem;
-    border: 1px solid #e0e0e0;
-    border-radius: 3px;
-    background-color: white;
-    font-size: 0.85rem;
-    color: #555;
     font-family: monospace;
 }
 
@@ -395,10 +356,4 @@ p.description {
     content: attr(data-placeholder);
     color: #aaa;
     font-style: italic;
-}
-
-.tags.editable:focus {
-    outline: none;
-    border-color: #4a90e2;
-    background-color: #fefefe;
 }
