@@ -350,6 +350,8 @@ p.description {
 
 .tags.editable {
     font-family: monospace;
+    outline:none;
+    flex-grow:10;
 }
 
 .tags.editable:empty:before {

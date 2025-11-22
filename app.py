@@ -67,7 +67,6 @@ class Task(db.Model):
             return classes
 
 class AppState(db.Model):
-    """Store application state for single-user app"""
     __tablename__ = "app_state"
     
     id = db.Column(db.Integer, primary_key=True)
@@ -75,7 +74,6 @@ class AppState(db.Model):
     active_tags = db.Column(db.String(1024), default="")  # comma-separated list of active tags
     
     def get_active_tags(self):
-        """Return list of active filter tags"""
         if not self.active_tags:
             return []
         return [tag.strip() for tag in self.active_tags.split(',') if tag.strip()]
@@ -88,14 +86,12 @@ class AppState(db.Model):
             self.active_tags = tags_list
 
 def get_default_filters():
-    """Return default filter state"""
     return {
         'show_completed': True,
         'active_tags': ""  # Store as empty string, not list
     }
 
 def load_filters():
-    """Load filter state from database"""
     state = AppState.query.first()
     if not state:
         # Create default state
@@ -114,7 +110,6 @@ def load_filters():
 
 
 def save_filters(show_completed=None, active_tags=None):
-    """Save filter state to database"""
     state = AppState.query.first()
     if not state:
         state = AppState()
@@ -130,7 +125,6 @@ def save_filters(show_completed=None, active_tags=None):
 
 
 def get_all_tags():
-    """Get all unique tags across all tasks"""
     all_tasks = Task.query.all()
     tags = set()
     for task in all_tasks:
@@ -139,19 +133,12 @@ def get_all_tags():
 
 
 def apply_filters(tasks, filters):
-    """Apply filters to task list
-    
-    Tag filtering: Show tasks that match tag + ALL their descendants
-                   Also show descendants that match (promoted to root level)
-    Completion filtering: Apply to all tasks in hierarchy
-    """
     active_tags = filters.get('active_tags', [])
     show_completed = filters.get('show_completed', True)
     
     # First, apply completion filtering if needed
     if not show_completed:
         def filter_completed(task):
-            """Recursively filter out completed tasks"""
             task.children = [filter_completed(child) for child in task.children if not child.completed]
             return task
         
@@ -161,11 +148,6 @@ def apply_filters(tasks, filters):
     # Then, apply tag filtering
     if active_tags:
         def filter_by_tags(task, parent_matched=False):
-            """
-            Recursively filter tasks by tags.
-            If parent matched, keep all children.
-            If parent didn't match, only keep children that match (and promote them).
-            """
             task_tags = task.get_tags()
             task_matches = any(tag in active_tags for tag in task_tags)
             
@@ -216,7 +198,6 @@ def displace_task(displacement,task_id,task_new_pos=None):
 
 
 def get_correct_root_tasks():
-    """Get root tasks with current filters applied"""
     filters = load_filters()
     root_tasks = sorted(Task.query.filter_by(parent_id=None).all(), key=lambda x: x.order)
     return apply_filters(root_tasks, filters)
@@ -235,7 +216,6 @@ def require_login():
 
 @app.route('/')
 def base_view():
-    """Main view with filter tabs and task list"""
     try:
         filters = load_filters()
         root_tasks = get_correct_root_tasks()
