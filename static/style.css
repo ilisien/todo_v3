@@ -19,6 +19,9 @@
   --color-due-this-week: cornflowerblue;
 
   --color-warning:red;
+  --color-info: cornflowerblue;
+  --color-info-2: violet;
+
 }
 
 * {
@@ -198,6 +201,7 @@ p.description {
 .editable:empty::before {
   content: attr(data-placeholder);
   color: var(--color-placeholder);
+  font-style: italic;
   pointer-events: none;
 }
 
@@ -326,16 +330,17 @@ p.description {
   cursor: pointer;
   font-size: 0.9rem;
   transition: all 0.2s ease;
+  background-color: var(--color-mid);
+  color:var(--color-white);
 }
 
 .filter-tab:hover {
-  background-color: #f0f0f0;
-  border-color: #a0a0a0;
+  background-color: var(--color-info);
 }
 
 .filter-tab.active {
-  background-color: #4a90e2;
-  color: white;
+  background-color: var(--color-info-2);
+  color: var(--color-white);
 }
 
 /* Tags Field Styling */
