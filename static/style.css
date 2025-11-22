@@ -306,56 +306,56 @@ p.description {
 
 /* Filter Tabs Styling */
 .filter-tabs-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 1rem;
-    flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  flex-wrap: wrap;
 }
 
 .filter-tabs {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    flex: 1;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  flex: 1;
 }
 
 .filter-tab {
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
 }
 
 .filter-tab:hover {
-    background-color: #f0f0f0;
-    border-color: #a0a0a0;
+  background-color: #f0f0f0;
+  border-color: #a0a0a0;
 }
 
 .filter-tab.active {
-    background-color: #4a90e2;
-    color: white;
+  background-color: #4a90e2;
+  color: white;
 }
 
 /* Tags Field Styling */
 .tags-wrapper {
-    display: flex;
-    gap:15px;
+  display: flex;
+  gap:15px;
 }
 
 .tags-label {
-    white-space: nowrap;
+  white-space: nowrap;
 }
 
 .tags.editable {
-    font-family: monospace;
-    outline:none;
-    flex-grow:10;
+  font-family: monospace;
+  outline:none;
+  flex-grow:10;
 }
 
 .tags.editable:empty:before {
-    content: attr(data-placeholder);
-    color: #aaa;
-    font-style: italic;
+  content: attr(data-placeholder);
+  color: #aaa;
+  font-style: italic;
 }
