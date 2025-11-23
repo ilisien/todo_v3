@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.security import check_password_hash
 from password_hash import PASSWORD_HASH
+from flask_migrate import Migrate
 
 app = Flask(__name__)
 app.secret_key = "secret key"
@@ -13,6 +14,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'ba
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 class Task(db.Model):
     __tablename__ = "tasks"
