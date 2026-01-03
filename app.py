@@ -186,12 +186,19 @@ def apply_filters(tasks, filters):
 
 def displace_task(displacement,task_id,task_new_pos=None):
     task_at_hand = Task.query.get_or_404(task_id)
-    task_start_pos = task_at_hand.order
+    
+    siblings_of_task = sorted(
+        Task.query.filter_by(parent_id=task_at_hand.parent_id).all(),
+        key=lambda x: x.order
+    )
+    
+    task_start_pos = next(i for i, t in enumerate(siblings_of_task) if t.id == task_id)
+    
     if task_new_pos is None:
         task_new_pos = task_start_pos + displacement
-    siblings_of_task = sorted(Task.query.filter_by(parent_id=task_at_hand.parent_id).all(),key=lambda x: x.order)
-    if 0 <= task_new_pos <= len(siblings_of_task)-1:
-        siblings_of_task.insert(task_new_pos,siblings_of_task.pop(task_start_pos))
+    
+    if 0 <= task_new_pos <= len(siblings_of_task) - 1:
+        siblings_of_task.insert(task_new_pos, siblings_of_task.pop(task_start_pos))
         
         for i, sibling in enumerate(siblings_of_task):
             sibling.order = i
@@ -344,11 +351,40 @@ def update_task_option(option,task_id):
 
 @app.route("/move-task/<int:task_id>", methods=["POST"])
 def move_task(task_id):
-    displace_task(int(request.form.get('displacement', '')),task_id)
+    displacement = int(request.form.get('displacement', ''))
+    
+    # Get current filters
+    filters = load_filters()
+    
+    # Get the task being moved
+    task = Task.query.get_or_404(task_id)
+    
+    # Get all siblings
+    all_siblings = sorted(
+        Task.query.filter_by(parent_id=task.parent_id).all(),
+        key=lambda x: x.order
+    )
+    
+    visible_siblings = apply_filters(all_siblings, filters)
+    
+    visible_ids = [t.id for t in visible_siblings]
+    if task_id not in visible_ids:
+        root_tasks = get_correct_root_tasks()
+        return render_template("_task_list.html", tasks=root_tasks)
+    
+    current_visible_pos = visible_ids.index(task_id)
+    new_visible_pos = current_visible_pos + displacement
+    
+    new_visible_pos = max(0, min(new_visible_pos, len(visible_siblings) - 1))
+    
+    target_task = visible_siblings[new_visible_pos]
+    
+    target_full_pos = next(i for i, t in enumerate(all_siblings) if t.id == target_task.id)
+    
+    displace_task(None, task_id, target_full_pos)
     
     root_tasks = get_correct_root_tasks()
     return render_template("_task_list.html", tasks=root_tasks)
-
 
 @app.route("/update-task-due/<string:date_part>/<int:task_id>", methods=["POST"])
 def update_task_due(date_part,task_id):

@@ -5,23 +5,22 @@
   --gap-md: 10px;
 
   --font-family-base: monospace;
-  --color-placeholder: #aaa;
+  --color-placeholder: #666;
   --color-selection-bg: black;
   --color-selection-text: white;
   --color-white: white;
-  --color-primary: #000;
-  --color-bg: #fff;
-  --color-mid: #aaa;
+  --color-primary: #eee;
+  --color-bg: #333;
+  --color-mid: #666;
 
-  --color-past-due: red;
-  --color-due-today: orange;
-  --color-due-tomorrow: violet;
-  --color-due-this-week: cornflowerblue;
+  --color-past-due: rgb(210, 45, 45);
+  --color-due-today: rgb(242, 182, 72);
+  --color-due-tomorrow: rgb(184, 87, 184);
+  --color-due-this-week: rgb(70, 116, 200);
 
-  --color-warning:red;
-  --color-info: cornflowerblue;
-  --color-info-2: violet;
-
+  --color-warning:rgb(210, 45, 45);
+  --color-info: rgb(70, 116, 200);
+  --color-info-2: rgb(184, 87, 184);
 }
 
 * {
@@ -77,15 +76,20 @@ body {
 button {
   border: none;
   background-color: transparent;
+  font-family: var(--font-family-base);
+  color:var(--color-primary);
 }
 
 input {
   border-style: dashed;
   border-color: var(--color-primary);
+  background-color: var(--color-bg);
   border-width:0;
   border-bottom-width:2px;
   border-radius: 4px;
   outline: none;
+  font-family: var(--font-family-base);
+  color:var(--color-primary);
 }
 
 .login-error {
@@ -361,6 +365,6 @@ p.description {
 
 .tags.editable:empty:before {
   content: attr(data-placeholder);
-  color: #aaa;
+  color: var(--color-placeholder);
   font-style: italic;
 }
