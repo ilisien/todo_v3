@@ -34,5 +34,15 @@
             }
         });
     </script>
+    <script>
+        // blur from all elements when esc is pressed
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (document.activeElement) {
+                    document.activeElement.blur();
+                }
+            }
+        });
+    </script>
 </body>
 </html>

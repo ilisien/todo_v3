@@ -14,12 +14,12 @@
   --color-mid: #666;
 
   --color-past-due: rgb(210, 45, 45);
-  --color-due-today: rgb(242, 182, 72);
+  --color-due-today: rgb(220, 146, 19);
   --color-due-tomorrow: rgb(184, 87, 184);
-  --color-due-this-week: rgb(70, 116, 200);
+  --color-due-this-week: rgb(74, 127, 225);
 
   --color-warning:rgb(210, 45, 45);
-  --color-info: rgb(70, 116, 200);
+  --color-info: rgb(74, 127, 225);
   --color-info-2: rgb(184, 87, 184);
 }
 
@@ -27,6 +27,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-size: 1rem;
 }
 
 *::selection {
@@ -83,13 +84,13 @@ button {
 input {
   border-style: dashed;
   border-color: var(--color-primary);
-  background-color: var(--color-bg);
+  background-color: var(--color-bg) !important;
   border-width:0;
   border-bottom-width:2px;
   border-radius: 4px;
   outline: none;
   font-family: var(--font-family-base);
-  color:var(--color-primary);
+  color:var(--color-primary) !important;
 }
 
 .login-error {
@@ -167,6 +168,15 @@ input {
   user-select: none;
   margin-right: 8px;
   flex-shrink: 0;
+}
+
+.task-item:hover .completed {
+  color:var(--color-info);
+}
+
+.task-item:focus-within .completed {
+  color:var(--color-info-2);
+  transition: all 1s;
 }
 
 .name {
@@ -274,6 +284,11 @@ p.description {
   cursor: pointer;
 }
 
+.option:focus {
+  outline: none;
+  color: var(--color-info-2);
+}
+
 .task-content-wrapper:focus-within .pagebottom {
   visibility: visible;
 }
@@ -283,6 +298,11 @@ p.description {
   top: 0;
   left: 0;
   padding: 10px;
+}
+
+.logout-button:focus {
+  outline:none;
+  color: var(--color-info-2);
 }
 
 .toggle-completed-tasks {
@@ -297,6 +317,10 @@ p.description {
     color: var(--color-warning);
 }
 
+.toggle-completed-tasks:focus {
+  outline:none;
+  color: var(--color-info-2);
+}
 
 .htmx-indicator {
   opacity: 0;
@@ -333,7 +357,6 @@ p.description {
 .filter-tab {
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.9rem;
   transition: all 0.2s ease;
   background-color: var(--color-mid);
   color:var(--color-white);
@@ -341,6 +364,10 @@ p.description {
 
 .filter-tab:hover {
   background-color: var(--color-info);
+}
+
+.filter-tab:focus {
+  outline:none;
 }
 
 .filter-tab.active {
