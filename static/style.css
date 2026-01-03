@@ -187,8 +187,13 @@ input {
   transition: all 0.25s;
 }
 
+.task-item:focus-within .task-content-wrapper:hover .completed {
+  color:var(--color-info);
+  transition: all 0.25s;
+}
+
 .task-content-wrapper:focus-within .completed {
-  color:var(--color-info-2);
+  color:var(--color-info-2) !important;
   transition: all 0.5s;
 }
 
