@@ -100,6 +100,24 @@
       hx-vals='js:{"displacement": 1}'
       hx-indicator="#indicator"></form>
 
+<!-- another form to handle climbing upwards-->
+<form style="display: none;" 
+      hx-post="/climb-task/{{ task.id }}"
+      hx-target="#task-list"
+      hx-swap="innerHTML"
+      hx-trigger="keyup[ctrlKey&&key=='ArrowLeft'] from:previous .name"
+      hx-vals='js:{"displacement": -1}'
+      hx-indicator="#indicator"></form>
+
+<!-- another form to handle climbing downwards-->
+<form style="display: none;" 
+      hx-post="/climb-task/{{ task.id }}"
+      hx-target="#task-list"
+      hx-swap="innerHTML"
+      hx-trigger="keyup[ctrlKey&&key=='ArrowRight'] from:previous .name"
+      hx-vals='js:{"displacement": 1}'
+      hx-indicator="#indicator"></form>
+
 <!-- handle refreshing complete after option change -->
 <form style="display: none;" 
       hx-post="/refresh/complete/{{ task.id }}"
@@ -116,7 +134,7 @@
       hx-trigger="click from:#date-toggle-{{task.id}}"
       hx-indicator="#indicator"></form>
 
-<!-- Handle refreshing filter tabs after tag changes -->
+<!-- handle refreshing filter tabs after tag changes -->
 <form style="display: none;" 
       id="refresh-tabs-form"
       hx-post="/refresh-tabs"

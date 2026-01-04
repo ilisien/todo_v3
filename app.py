@@ -31,7 +31,7 @@ class Task(db.Model):
 
     name = db.Column(db.String(512), nullable=False, default="")
     description = db.Column(db.String(2048), default="")
-    tags = db.Column(db.String(512), default="")  # NEW: comma-separated tags
+    tags = db.Column(db.String(512), default="")
     due_date = db.Column(db.DateTime, default=datetime.datetime.now)
 
     def get_tags(self):
@@ -86,6 +86,11 @@ class AppState(db.Model):
             self.active_tags = ','.join(tags_list)
         else:
             self.active_tags = tags_list
+
+def children(parent_id):
+    return sorted(
+            Task.query.filter_by(parent_id=parent_id).all(),
+            key=lambda x: x.order)
 
 def get_default_filters():
     return {
@@ -205,6 +210,83 @@ def displace_task(displacement,task_id,task_new_pos=None):
         
         db.session.commit()
 
+
+def dent_task_to_parent(task_id, new_parent_id):
+    task = Task.query.get_or_404(task_id)
+    new_parent = Task.query.get_or_404(new_parent_id)
+    
+    # Get old siblings before changing parent
+    old_siblings = children(task.parent_id)
+    
+    # Change parent
+    task.parent_id = new_parent_id
+    
+    # Get new siblings and add task at the beginning
+    new_siblings = children(new_parent_id)
+    
+    # Renumber old siblings (task is no longer among them)
+    for i, sibling in enumerate(old_siblings):
+        sibling.order = i
+    
+    # Renumber new siblings (task is now first)
+    for i, sibling in enumerate(new_siblings):
+        sibling.order = i
+    
+    db.session.commit()
+
+
+def dent_task(displacement, task_id):
+    task_at_hand = Task.query.get_or_404(task_id)
+
+    if displacement < 0:  # OUTDENT
+        if task_at_hand.parent_id == None:
+            return
+        
+        parent_of_task = Task.query.get_or_404(task_at_hand.parent_id)
+        
+        aunts_and_uncles = children(parent_of_task.parent_id)
+
+        parent_start_position = next(i for i, t in enumerate(aunts_and_uncles) if t.id == task_at_hand.parent_id)
+
+        task_at_hand.parent_id = parent_of_task.parent_id
+
+        aunts_and_uncles.insert(parent_start_position + 1, task_at_hand)
+
+        for i, sibling in enumerate(aunts_and_uncles):
+            sibling.order = i
+
+        old_siblings = children(parent_of_task.id)
+
+        for i, sibling in enumerate(old_siblings):
+            sibling.order = i
+
+        db.session.commit()
+
+    elif displacement > 0:  # INDENT
+        siblings = children(task_at_hand.parent_id)
+
+        task_start_position = next(i for i, t in enumerate(siblings) if t.id == task_id)
+
+        if task_start_position == 0:
+            return
+
+        new_parent = siblings[task_start_position - 1]
+
+        new_siblings = children(new_parent.id)
+
+        task_at_hand.parent_id = new_parent.id
+
+        new_siblings.insert(0, task_at_hand)
+
+        for i, sibling in enumerate(new_siblings):
+            sibling.order = i
+
+        old_siblings = children(new_parent.parent_id)
+
+        for i, sibling in enumerate(old_siblings):
+            sibling.order = i
+
+        db.session.commit()
 
 def get_correct_root_tasks():
     filters = load_filters()
@@ -382,6 +464,57 @@ def move_task(task_id):
     target_full_pos = next(i for i, t in enumerate(all_siblings) if t.id == target_task.id)
     
     displace_task(None, task_id, target_full_pos)
+    
+    root_tasks = get_correct_root_tasks()
+    return render_template("_task_list.html", tasks=root_tasks)
+
+@app.route("/climb-task/<int:task_id>", methods=["POST"])
+def climb_task(task_id):
+    displacement = int(request.form.get('displacement', ''))
+    
+    # Get current filters
+    filters = load_filters()
+    
+    # Get the task being moved
+    task = Task.query.get_or_404(task_id)
+    
+    if displacement < 0:  # OUTDENT
+        # Can't outdent if already at root
+        if task.parent_id is None:
+            root_tasks = get_correct_root_tasks()
+            return render_template("_task_list.html", tasks=root_tasks)
+        
+        # We want to outdent, so just call the original function
+        dent_task(displacement, task_id)
+    
+    elif displacement > 0:  # INDENT
+        # Get all siblings (same parent)
+        all_siblings = sorted(
+            Task.query.filter_by(parent_id=task.parent_id).all(),
+            key=lambda x: x.order
+        )
+        
+        # Apply filters to get visible siblings
+        visible_siblings = apply_filters(all_siblings, filters)
+        
+        # Find task's position in visible list
+        visible_ids = [t.id for t in visible_siblings]
+        if task_id not in visible_ids:
+            root_tasks = get_correct_root_tasks()
+            return render_template("_task_list.html", tasks=root_tasks)
+        
+        current_visible_pos = visible_ids.index(task_id)
+        
+        # Can't indent if it's the first visible item (nothing to indent under)
+        if current_visible_pos == 0:
+            root_tasks = get_correct_root_tasks()
+            return render_template("_task_list.html", tasks=root_tasks)
+        
+        # Get the visible sibling immediately before this one
+        new_parent = visible_siblings[current_visible_pos - 1]
+        
+        # Now perform the indent operation to make it a child of new_parent
+        dent_task_to_parent(task_id, new_parent.id)
     
     root_tasks = get_correct_root_tasks()
     return render_template("_task_list.html", tasks=root_tasks)
