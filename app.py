@@ -17,6 +17,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+TZ = timezone('EST')
 
 class Task(db.Model):
     __tablename__ = "tasks"
@@ -34,8 +35,8 @@ class Task(db.Model):
     name = db.Column(db.String(512), nullable=False, default="")
     description = db.Column(db.String(2048), default="")
     tags = db.Column(db.String(512), default="")
-    tz = timezone('EST')
-    due_date = db.Column(db.DateTime, default=datetime.datetime.now(tz))
+
+    due_date = db.Column(db.DateTime, default=datetime.datetime.now(TZ))
 
     def get_tags(self):
         """Return list of tags"""
@@ -57,8 +58,7 @@ class Task(db.Model):
     def get_due_classes(self):
         classes = "due-wrapper "
         if self.show_date:
-            tz = timezone('EST')
-            today = datetime.datetime.now(tz).date()
+            today = datetime.datetime.now(TZ).date()
             if self.due_date.date() < today:
                 classes += "past-due "
             elif self.due_date.date() == today:
@@ -78,6 +78,7 @@ class AppState(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     show_completed = db.Column(db.Boolean, default=True)
     active_tags = db.Column(db.String(1024), default="")  # comma-separated list of active tags
+    last_checked_in = db.Column(db.DateTime, default=datetime.datetime.now(TZ))
     
     def get_active_tags(self):
         if not self.active_tags:
@@ -557,8 +558,7 @@ def get_updated_date_warning(task_id):
 
     other_classes = "due-wrapper "
     if task.show_date:
-        tz = timezone('EST')
-        today = datetime.datetime.now(tz).date()
+        today = datetime.datetime.now(TZ).date()
         if task.due_date.date() < today:
             other_classes += "past-due "
         elif task.due_date.date() == today:
