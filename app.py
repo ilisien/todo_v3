@@ -5,8 +5,8 @@ from flask import Flask, redirect, url_for, request, render_template, session, r
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.security import check_password_hash
-from secrets import PASSWORD_HASH
-from secrets import SECRET_KEY
+from config import PASSWORD_HASH
+from config import SECRET_KEY
 from flask_migrate import Migrate
 
 app = Flask(__name__)

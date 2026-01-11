@@ -2,4 +2,4 @@
 __pycache__/
 wsgi.py
 env/
-secrets.py
+config.py
