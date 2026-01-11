@@ -461,9 +461,10 @@ def update_task_schedule(task_id):
     last_checked_in = state.last_checked_in.strftime('%A').lower()
     today = datetime.datetime.now(TZ).strftime('%A').lower()
 
-    schedule = [t.strip() for t in task.schedule.lower().split(',')]
-    if (not today in schedule) and (not 'daily' in schedule):
-        task.completed = True
+    schedule = [t.strip() for t in task.schedule.lower().split(',') if t.strip() != ""]
+    if len(schedule) > 0:
+        if (not today in schedule) and (not 'daily' in schedule):
+            task.completed = True
 
     db.session.commit()
 
