@@ -128,10 +128,10 @@ input {
   justify-content: center;
   flex-direction: row;
   visibility: hidden;
-  background-color: color-mix(in srgb, var(--color-bg) 70%, transparent);
+  background-color: color-mix(in srgb, var(--color-bg) 95%, transparent);
   border-top-style: dashed;
   border-top-color: var(--color-primary);
-  border-top-width: 1px;
+  border-top-width: 2px;
 }
 
 .task-item {
@@ -220,6 +220,7 @@ input {
   padding: 10px;
   border-radius: var(--border-radius-sm);
   border: dashed;
+  border-width:2px;
   width: 100%;
   height: 100px;
 }
