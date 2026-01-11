@@ -5,11 +5,12 @@ from flask import Flask, redirect, url_for, request, render_template, session, r
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.security import check_password_hash
-from password_hash import PASSWORD_HASH
+from secrets import PASSWORD_HASH
+from secrets import SECRET_KEY
 from flask_migrate import Migrate
 
 app = Flask(__name__)
-app.secret_key = "secret key"
+app.secret_key = SECRET_KEY
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'backend.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
