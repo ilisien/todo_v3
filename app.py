@@ -1,4 +1,5 @@
 import datetime, time, secrets, os
+from pytz import timezone
 
 from flask import Flask, redirect, url_for, request, render_template, session, redirect, Response
 from flask_sqlalchemy import SQLAlchemy
@@ -32,7 +33,8 @@ class Task(db.Model):
     name = db.Column(db.String(512), nullable=False, default="")
     description = db.Column(db.String(2048), default="")
     tags = db.Column(db.String(512), default="")
-    due_date = db.Column(db.DateTime, default=datetime.datetime.now)
+    tz = timezone('EST')
+    due_date = db.Column(db.DateTime, default=datetime.datetime.now(tz))
 
     def get_tags(self):
         """Return list of tags"""
@@ -54,7 +56,8 @@ class Task(db.Model):
     def get_due_classes(self):
         classes = "due-wrapper "
         if self.show_date:
-            today = datetime.datetime.now().date()
+            tz = timezone('EST')
+            today = datetime.datetime.now(tz).date()
             if self.due_date.date() < today:
                 classes += "past-due "
             elif self.due_date.date() == today:
@@ -553,7 +556,8 @@ def get_updated_date_warning(task_id):
 
     other_classes = "due-wrapper "
     if task.show_date:
-        today = datetime.datetime.now().date()
+        tz = timezone('EST')
+        today = datetime.datetime.now(tz).date()
         if task.due_date.date() < today:
             other_classes += "past-due "
         elif task.due_date.date() == today:
