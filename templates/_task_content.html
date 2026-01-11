@@ -18,10 +18,9 @@
                     hx-trigger="click"
                     hx-indicator="#indicator">{% if task.show_as_task %}[x] showing as task{% else %}[ ] showing as list item{% endif %}</span>
                
-               <!-- Tags Field -->
-               <div class="tags-wrapper">
-                    <span class="tags-label">tags:</span>
-                    <p class="tags editable" 
+               <div class="bottom-short-editable-wrapper">
+                    <span class="bottom-short-editable-label">tags:</span>
+                    <p class="bottom-short-editable editable" 
                        id="tags-{{task.id}}"
                        contenteditable="true"
                        data-placeholder="untagged ..."
@@ -32,6 +31,20 @@
                        hx-vals='js:{"tags": event.target.textContent.trim()}'
                        hx-indicator="#indicator"
                        hx-on::after-request="htmx.trigger('#filter-tabs', 'refresh-tabs')">{{task.get_tags_display()}}</p>
+               </div>
+
+               <div class="bottom-short-editable-wrapper">
+                    <span class="bottom-short-editable-label">schedule:</span>
+                    <p class="bottom-short-editable editable" 
+                       id="schedule-{{task.id}}"
+                       contenteditable="true"
+                       data-placeholder="unscheduled ..."
+                       hx-post="/update-task-schedule/{{ task.id }}"
+                       hx-trigger="blur"
+                       hx-target="#completed-{{task.id}}"
+                       hx-swap="outerHTML"
+                       hx-vals='js:{"schedule": event.target.textContent.trim()}'
+                       hx-indicator="#indicator">{{task.schedule}}</p>
                </div>
 
                <div class="description-wrapper">

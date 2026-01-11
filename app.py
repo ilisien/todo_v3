@@ -19,6 +19,18 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 TZ = timezone('EST')
 
+@app.after_request
+def suffixes(response):
+    if session.get("authenticated"):
+        state = AppState.query.first()
+        if not state:
+            state = AppState()
+            db.session.add(state)
+        state.last_checked_in = datetime.datetime.now(TZ)
+        db.session.commit()
+        print(f"last_checked_in at: {state.last_checked_in}")
+    return response
+
 class Task(db.Model):
     __tablename__ = "tasks"
 
@@ -35,7 +47,7 @@ class Task(db.Model):
     name = db.Column(db.String(512), nullable=False, default="")
     description = db.Column(db.String(2048), default="")
     tags = db.Column(db.String(512), default="")
-
+    schedule = db.Column(db.String(512), default="")
     due_date = db.Column(db.DateTime, default=datetime.datetime.now(TZ))
 
     def get_tags(self):
@@ -147,7 +159,7 @@ def get_all_tags():
 def apply_filters(tasks, filters):
     active_tags = filters.get('active_tags', [])
     show_completed = filters.get('show_completed', True)
-    
+
     # First, apply completion filtering if needed
     if not show_completed:
         def filter_completed(task):
@@ -193,6 +205,36 @@ def apply_filters(tasks, filters):
     
     return tasks
 
+def apply_scheduling(tasks):
+    state = AppState.query.first()
+    if not state:
+        state = AppState()
+        db.session.add(state)
+
+    last_checked_in = state.last_checked_in.strftime('%A').lower()
+    today = datetime.datetime.now(TZ).strftime('%A').lower()
+
+    if last_checked_in != today:
+        def uncomplete_scheduled(task):
+            #(and vice versa)
+            schedule = [t.strip() for t in task.schedule.lower().split(',') if t.strip() != ""]
+
+            if len(schedule) > 0:
+                if 'daily' in schedule:
+                    task.completed = False
+                elif today in schedule:
+                    task.completed = False
+                elif today not in schedule:
+                    task.completed = True
+            
+            for child in task.children:
+                uncomplete_scheduled(child)
+        
+        for task in tasks:
+            uncomplete_scheduled(task)
+    
+    db.session.commit()
+    return tasks
 
 def displace_task(displacement,task_id,task_new_pos=None):
     task_at_hand = Task.query.get_or_404(task_id)
@@ -296,8 +338,8 @@ def dent_task(displacement, task_id):
 def get_correct_root_tasks():
     filters = load_filters()
     root_tasks = sorted(Task.query.filter_by(parent_id=None).all(), key=lambda x: x.order)
+    root_tasks = apply_scheduling(root_tasks)
     return apply_filters(root_tasks, filters)
-
 
 @app.before_request
 def require_login():
@@ -308,7 +350,6 @@ def require_login():
                 resp.headers["HX-Redirect"] = url_for("login")
                 return resp
             return redirect(url_for("login"))
-
 
 @app.route('/')
 def base_view():
@@ -406,6 +447,28 @@ def update_task_tags(task_id):
     
     return task.get_tags_display()
 
+@app.route("/update-task-schedule/<int:task_id>",methods=["POST"])
+def update_task_schedule(task_id):
+    task = Task.query.get_or_404(task_id)
+    schedule_string = request.form.get('schedule','')
+    task.schedule = schedule_string
+
+    state = AppState.query.first()
+    if not state:
+        state = AppState()
+        db.session.add(state)
+    
+    last_checked_in = state.last_checked_in.strftime('%A').lower()
+    today = datetime.datetime.now(TZ).strftime('%A').lower()
+
+    schedule = [t.strip() for t in task.schedule.lower().split(',')]
+    if (not today in schedule) and (not 'daily' in schedule):
+        task.completed = True
+
+    db.session.commit()
+
+    root_tasks = get_correct_root_tasks()
+    return render_template("_completed.html", task=task)
 
 @app.route("/refresh/<string:to_refresh>/<int:task_id>", methods=["POST"])
 def refresh(to_refresh,task_id):

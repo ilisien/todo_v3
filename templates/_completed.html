@@ -4,4 +4,4 @@
     hx-target="#task-content-{{ task.id }}"
     hx-swap="innerHTML"
     hx-trigger="{% if task.show_as_task %}click{% else %}none{% endif %}"
-    hx-indicator="#indicator">{% if task.show_as_task %}{% if task.completed %}[x]{% else %}[ ]{% endif %}{% else %}&nbsp;-&nbsp;{% endif %}</span>
+    hx-indicator="#indicator">{% if task.show_as_task %}{% if task.completed %}[x]{% else %}{% if task.schedule == "" %}[ ]{% else %}[s]{% endif %}{% endif %}{% else %}&nbsp;-&nbsp;{% endif %}</span>

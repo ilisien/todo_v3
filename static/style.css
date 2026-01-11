@@ -393,22 +393,22 @@ p.description {
 }
 
 /* Tags Field Styling */
-.tags-wrapper {
+.bottom-short-editable-wrapper {
   display: flex;
   gap:15px;
 }
 
-.tags-label {
+.bottom-short-editable-label {
   white-space: nowrap;
 }
 
-.tags.editable {
+.bottom-short-editable.editable {
   font-family: monospace;
   outline:none;
   flex-grow:10;
 }
 
-.tags.editable:empty:before {
+.bottom-short-editable.editable:empty:before {
   content: attr(data-placeholder);
   color: var(--color-placeholder);
   font-style: italic;
