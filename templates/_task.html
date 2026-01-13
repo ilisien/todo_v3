@@ -1,4 +1,4 @@
-<div id="task-item-{{ task.id }}" class="task-item">
+<div id="task-item-{{ task.id }}" class="task-item" completed="{{ 'true' if task.completed else 'false' }}" >
     <div id="task-content-{{ task.id }}">
         {% include '_task_content.html' %}
     </div>

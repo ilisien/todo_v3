@@ -94,6 +94,10 @@ input {
   color:var(--color-primary) !important;
 }
 
+.task-container.hide-completed .task-item[completed="true"] {
+    display: none;
+}
+
 .login-error {
   color: var(--color-warning);
 }

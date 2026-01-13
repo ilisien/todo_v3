@@ -28,7 +28,7 @@ def suffixes(response):
             db.session.add(state)
         state.last_checked_in = datetime.datetime.now(TZ)
         db.session.commit()
-        print(f"last_checked_in at: {state.last_checked_in}")
+        print(f"last_checked_in on: {state.last_checked_in.strftime('%A').lower()}")
     return response
 
 class Task(db.Model):
@@ -158,36 +158,22 @@ def get_all_tags():
 
 def apply_filters(tasks, filters):
     active_tags = filters.get('active_tags', [])
-    show_completed = filters.get('show_completed', True)
-
-    # First, apply completion filtering if needed
-    if not show_completed:
-        def filter_completed(task):
-            task.children = [filter_completed(child) for child in task.children if not child.completed]
-            return task
-        
-        tasks = [task for task in tasks if not task.completed]
-        tasks = [filter_completed(task) for task in tasks]
     
-    # Then, apply tag filtering
+    # Only apply tag filtering
     if active_tags:
         def filter_by_tags(task, parent_matched=False):
             task_tags = task.get_tags()
             task_matches = any(tag in active_tags for tag in task_tags)
             
             if parent_matched or task_matches:
-                # This task should be shown - keep ALL its children
                 return task
             else:
-                # This task doesn't match - check if any children match
-                # If children match, they get promoted
                 matching_children = []
                 for child in task.children:
                     filtered = filter_by_tags(child, parent_matched=False)
                     if filtered:
                         matching_children.append(filtered)
                 
-                # Don't show this task, but return its matching children to be promoted
                 return matching_children if matching_children else None
         
         filtered_tasks = []
@@ -195,10 +181,8 @@ def apply_filters(tasks, filters):
             result = filter_by_tags(task, parent_matched=False)
             if result:
                 if isinstance(result, list):
-                    # Children were promoted
                     filtered_tasks.extend(result)
                 else:
-                    # Task itself matched
                     filtered_tasks.append(result)
         
         return filtered_tasks
@@ -468,7 +452,6 @@ def update_task_schedule(task_id):
 
     db.session.commit()
 
-    root_tasks = get_correct_root_tasks()
     return render_template("_completed.html", task=task)
 
 @app.route("/refresh/<string:to_refresh>/<int:task_id>", methods=["POST"])
